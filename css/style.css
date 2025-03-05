@@ -52,7 +52,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center; /* Centers both login options */
+
   gap: 10px; /* Adds spacing between elements */
+
+
+
 }
 
 /* Student Login Button */
@@ -83,6 +87,7 @@ body {
 .admin-login:hover {
   text-decoration: underline;
 }
+
 
 /* Admin Page Styles */
 
@@ -151,6 +156,7 @@ body {
   width: 300px;
 }
 
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
@@ -167,4 +173,3 @@ body {
   }
 }
 
-/*  ////////////////////   */
