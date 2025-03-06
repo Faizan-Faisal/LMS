@@ -54,9 +54,6 @@ body {
   align-items: center; /* Centers both login options */
 
   gap: 10px; /* Adds spacing between elements */
-
-
-
 }
 
 /* Student Login Button */
@@ -87,7 +84,6 @@ body {
 .admin-login:hover {
   text-decoration: underline;
 }
-
 
 /* Admin Page Styles */
 
@@ -156,7 +152,6 @@ body {
   width: 300px;
 }
 
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
@@ -173,3 +168,59 @@ body {
   }
 }
 
+/*  ////////////////////   */
+
+.card {
+  background-color: #ffffff;
+  max-width: 400px;
+  margin: 50px auto;
+
+  padding: 10px 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  gap: 10px;
+
+  font-size: 20px;
+  /* color: red; */
+  text-decoration: none;
+}
+
+.card button {
+  padding: 10px; /* Better padding */
+  font-size: 15px;
+  background-color: rgba(126, 130, 133, 0.664);
+  border: 1px solid #ccc;
+  margin-top: 15px; /* Adds space between button and input field */
+  border-radius: 5px;
+  width: 100%; /* Make button full width for a better UI */
+}
+
+.card button:hover {
+  background-color: rgba(25, 31, 37, 0.664);
+
+  color: white;
+}
+.card h2 {
+  font-size: 24px;
+  color: #cc2a2a;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 18px;
+  color: #525050;
+  margin-bottom: 20px;
+}
+.card label {
+  font-size: 15px;
+}
+.card input {
+  width: 100%; /* Make the input take full width */
+  padding: 10px; /* Increase padding for a bigger feel */
+  font-size: 18px; /* Increase text size */
+  border: 1px solid #ccc;
+  border-radius: 5px; /* Rounded corners */
+  margin-top: 5px; /* Add spacing */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Slight depth */
+}
