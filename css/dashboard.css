@@ -1,0 +1,343 @@
+ /* Dashboard Styles */
+ .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    padding: 1rem;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+  }
+  
+  .logo h2 {
+    padding: 1rem 0;
+    text-align: center;
+    border-bottom: 1px solid #34495e;
+  }
+  
+  .nav-links {
+    list-style: none;
+    margin-top: 2rem;
+  }
+  
+  .nav-links li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1rem;
+    display: block;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .nav-links a i {
+    margin-right: 0.5rem;
+  }
+  
+  .nav-links li.active a,
+  .nav-links a:hover {
+    background-color: #34495e;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    margin-left: 250px; /* Match sidebar width */
+  }
+  
+  header {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .user-info i {
+    font-size: 2rem;
+    color: #2c3e50;
+  }
+  
+  /* Dashboard Sections */
+  .dashboard-section {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    display: none; /* Hide all sections by default */
+  }
+  
+  .dashboard-section.active {
+    display: block; /* Show only active section */
+  }
+  
+  /* Stats Cards */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .stat-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .stat-card i {
+    font-size: 2rem;
+    color: #4a90e2;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-card h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4a90e2;
+  }
+  
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Controls */
+  .attendance-controls,
+  .exam-controls,
+  .course-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  select, input[type="date"] {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .btn-primary {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  /* Registration Form Styles */
+  .registration-form {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-group label {
+    font-weight: 500;
+    color: #2c3e50;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  /* Student Management Styles */
+  .student-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .student-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .search-box {
+    position: relative;
+    width: 300px;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 10px 35px 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .search-box i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+  }
+
+  #registrationFormContainer {
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  #registrationFormContainer h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+  }
+
+  .student-table {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .student-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .student-table th,
+  .student-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  .student-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .student-table tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .student-table .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .student-table .btn-edit,
+  .student-table .btn-delete {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+
+  .student-table .btn-edit {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .student-table .btn-delete {
+    background-color: #f44336;
+    color: white;
+  }
+
+  .student-table .btn-edit:hover {
+    background-color: #45a049;
+  }
+
+  .student-table .btn-delete:hover {
+    background-color: #da190b;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .status-active {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .status-inactive {
+    background-color: #ffebee;
+    color: #c62828;
+  }
