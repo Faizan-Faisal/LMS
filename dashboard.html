@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LMS</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>LMS Admin</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active">
+                    <a href="#dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                </li>
+                <li>
+                    <a href="#student-management"><i class="fas fa-users-cog"></i> Manage Students</a>
+                </li>
+                <li>
+                    <a href="#attendance"><i class="fas fa-calendar-check"></i> Attendance</a>
+                </li>
+                <li>
+                    <a href="#exam-records"><i class="fas fa-file-alt"></i> Exam Records</a>
+                </li>
+                <li>
+                    <a href="#course-status"><i class="fas fa-graduation-cap"></i> Course Status</a>
+                </li>
+                <li>
+                    <a href="admin-login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="header-content">
+                    <h1>Welcome, Admin</h1>
+                    <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Overview -->
+            <section id="dashboard" class="dashboard-section">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <h3>Total Students</h3>
+                        <p>150</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-book"></i>
+                        <h3>Active Courses</h3>
+                        <p>12</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Average Attendance</h3>
+                        <p>85%</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-tasks"></i>
+                        <h3>Pending Tasks</h3>
+                        <p>5</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student Management Section -->
+            <section id="student-management" class="dashboard-section">
+                <h2>Student Management</h2>
+                <div class="student-controls">
+                    <div class="search-box">
+                        <input type="text" id="studentSearch" placeholder="Search students...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-primary" id="refreshStudents">Refresh List</button>
+                        <button class="btn-primary" id="showRegistrationForm">Register New Student</button>
+                    </div>
+                </div>
+
+                <!-- Student Registration Form (Initially Hidden) -->
+                <div id="registrationFormContainer" class="registration-form" style="display: none;">
+                    <h3>Register New Student</h3>
+                    <form id="studentForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="studentId">Student ID</label>
+                                <input type="text" id="studentId" name="studentId" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dob">Date of Birth</label>
+                                <input type="date" id="dob" name="dob" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="course">Course</label>
+                                <select id="course" name="course" required>
+                                    <option value="">Select Course</option>
+                                    <option value="cs101">Computer Science 101</option>
+                                    <option value="cs102">Computer Science 102</option>
+                                    <option value="math101">Mathematics 101</option>
+                                    <option value="eng101">Engineering 101</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="address">Address</label>
+                                <textarea id="address" name="address" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Register Student</button>
+                            <button type="reset" class="btn-secondary">Reset Form</button>
+                            <button type="button" class="btn-secondary" id="cancelRegistration">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="student-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Student data will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section id="attendance" class="dashboard-section">
+                <h2>Student Attendance</h2>
+                <div class="attendance-controls">
+                    <select id="course-select">
+                        <option value="">Select Course</option>
+                        <option value="course1">Course 1</option>
+                        <option value="course2">Course 2</option>
+                    </select>
+                    <input type="date" id="attendance-date">
+                    <button class="btn-primary">Mark Attendance</button>
+                </div>
+                <div class="attendance-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Attendance data will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Exam Records Section -->
+            <section id="exam-records" class="dashboard-section">
+                <h2>Exam Records</h2>
+                <div class="exam-controls">
+                    <select id="exam-course-select">
+                        <option value="">Select Course</option>
+                        <option value="course1">Course 1</option>
+                        <option value="course2">Course 2</option>
+                    </select>
+                    <button class="btn-primary">Add New Exam</button>
+                </div>
+                <div class="exam-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Exam Date</th>
+                                <th>Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Exam records will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Course Status Section -->
+            <section id="course-status" class="dashboard-section">
+                <h2>Course Status Management</h2>
+                <div class="course-controls">
+                    <button class="btn-primary">Add New Course</button>
+                    <button class="btn-secondary">Update Course Status</button>
+                </div>
+                <div class="course-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Course ID</th>
+                                <th>Course Name</th>
+                                <th>Status</th>
+                                <th>Enrolled Students</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Course status data will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="js/dashboard.js"></script>
+</body>
+</html> 
