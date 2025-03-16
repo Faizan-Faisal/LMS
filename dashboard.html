@@ -19,9 +19,6 @@
                     <a href="#dashboard"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
                 <li>
-                    <a href="#student-management"><i class="fas fa-users-cog"></i> Manage Students</a>
-                </li>
-                <li>
                     <a href="#attendance"><i class="fas fa-calendar-check"></i> Attendance</a>
                 </li>
                 <li>
@@ -70,100 +67,6 @@
                         <h3>Pending Tasks</h3>
                         <p>5</p>
                     </div>
-                </div>
-            </section>
-
-            <!-- Student Management Section -->
-            <section id="student-management" class="dashboard-section">
-                <h2>Student Management</h2>
-                <div class="student-controls">
-                    <div class="search-box">
-                        <input type="text" id="studentSearch" placeholder="Search students...">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="student-actions">
-                        <button class="btn-primary" id="refreshStudents">Refresh List</button>
-                        <button class="btn-primary" id="showRegistrationForm">Register New Student</button>
-                    </div>
-                </div>
-
-                <!-- Student Registration Form (Initially Hidden) -->
-                <div id="registrationFormContainer" class="registration-form" style="display: none;">
-                    <h3>Register New Student</h3>
-                    <form id="studentForm">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="studentId">Student ID</label>
-                                <input type="text" id="studentId" name="studentId" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="firstName">First Name</label>
-                                <input type="text" id="firstName" name="firstName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="lastName">Last Name</label>
-                                <input type="text" id="lastName" name="lastName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="dob">Date of Birth</label>
-                                <input type="date" id="dob" name="dob" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="gender">Gender</label>
-                                <select id="gender" name="gender" required>
-                                    <option value="">Select Gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="course">Course</label>
-                                <select id="course" name="course" required>
-                                    <option value="">Select Course</option>
-                                    <option value="cs101">Computer Science 101</option>
-                                    <option value="cs102">Computer Science 102</option>
-                                    <option value="math101">Mathematics 101</option>
-                                    <option value="eng101">Engineering 101</option>
-                                </select>
-                            </div>
-                            <div class="form-group full-width">
-                                <label for="address">Address</label>
-                                <textarea id="address" name="address" rows="3" required></textarea>
-                            </div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn-primary">Register Student</button>
-                            <button type="reset" class="btn-secondary">Reset Form</button>
-                            <button type="button" class="btn-secondary" id="cancelRegistration">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="student-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Student ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Course</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentTableBody">
-                            <!-- Student data will be populated dynamically -->
-                        </tbody>
-                    </table>
                 </div>
             </section>
 

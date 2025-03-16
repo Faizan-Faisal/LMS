@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - LMS</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/admin-dashboard.js" defer></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -70,9 +71,125 @@
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-graduation-cap"></i>
-                        <h3>Total Departments</h3>
-                        <p>8</p>
+                        <h3>Total Sections</h3>
+                        <p>4</p>
                     </div>
+                </div>
+            </section>
+
+            <!-- Student Management Section -->
+            <section id="student-management" class="dashboard-section">
+                <h2>Student Management</h2>
+                <div class="student-controls">
+                    <div class="search-box">
+                        <input type="text" id="studentSearch" placeholder="Search students...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-primary" id="showStudentForm">
+                            <i class="fas fa-plus"></i> Register New Student
+                        </button>
+                        <button class="btn-primary" id="refreshStudents">
+                            <i class="fas fa-sync"></i> Refresh List
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Registration Form -->
+                <div id="studentFormContainer" class="registration-form" style="display: none;">
+                    <h3>Register New Student</h3>
+                    <form id="studentForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="studentId">Student ID</label>
+                                <input type="text" id="studentId" name="studentId" placeholder="e.g., STD001" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" placeholder="3XX-XXXX-XXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cnic">CNIC</label>
+                                <input type="text" id="cnic" name="cnic" placeholder="12345-1234567-1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dob">Date of Birth</label>
+                                <input type="date" id="dob" name="dob" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="class">Class</label>
+                                <select id="class" name="class" required onchange="updateSectionOptions()">
+                                    <option value="">Select Class</option>
+                                    <option value="9">9th Class</option>
+                                    <option value="10">10th Class</option>
+                                    <option value="11">11th Class</option>
+                                    <option value="12">12th Class</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="section">Section</label>
+                                <select id="section" name="section" required>
+                                    <option value="">Select Class First</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="address">Address</label>
+                                <textarea id="address" name="address" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Register Student
+                            </button>
+                            <button type="reset" class="btn-secondary">
+                                <i class="fas fa-undo"></i> Reset Form
+                            </button>
+                            <button type="button" class="btn-secondary" id="cancelStudentForm">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Student Table -->
+                <div class="student-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Student data will be populated dynamically -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -85,13 +202,14 @@
                         <i class="fas fa-search"></i>
                     </div>
                     <div class="instructor-actions">
-                        <button class="btn-primary" id="showInstructorForm">Add New Instructor</button>
+                        <button class="btn-primary" id="refreshInstructors">Refresh List</button>
+                        <button class="btn-primary" id="showInstructorForm">Register New Instructor</button>
                     </div>
                 </div>
 
-                <!-- Instructor Registration Form (Initially Hidden) -->
+                <!-- Instructor Registration Form -->
                 <div id="instructorFormContainer" class="registration-form" style="display: none;">
-                    <h3>Add New Instructor</h3>
+                    <h3>Register New Instructor</h3>
                     <form id="instructorForm">
                         <div class="form-grid">
                             <div class="form-group">
@@ -112,7 +230,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" required>
+                                <input type="tel" id="phone" name="phone" placeholder="3XX-XXXX-XXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cnic">CNIC</label>
+                                <input type="text" id="cnic" name="cnic" placeholder="12345-1234567-1" required>
                             </div>
                             <div class="form-group">
                                 <label for="department">Department</label>
@@ -128,23 +250,43 @@
                                 <label for="qualification">Qualification</label>
                                 <input type="text" id="qualification" name="qualification" required>
                             </div>
+                            <div class="form-group">
+                                <label for="specialization">Specialization</label>
+                                <input type="text" id="specialization" name="specialization" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="experience">Years of Experience</label>
+                                <input type="number" id="experience" name="experience" min="0" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="assignedCourses">Assigned Courses</label>
+                                <select id="assignedCourses" name="assignedCourses" multiple required>
+                                    <option value="cs101">Computer Science 101</option>
+                                    <option value="cs102">Computer Science 102</option>
+                                    <option value="math101">Mathematics 101</option>
+                                    <option value="eng101">Engineering 101</option>
+                                    <option value="physics101">Physics 101</option>
+                                </select>
+                                <small>Hold Ctrl/Cmd to select multiple courses</small>
+                            </div>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="btn-primary">Add Instructor</button>
+                            <button type="submit" class="btn-primary">Register Instructor</button>
                             <button type="reset" class="btn-secondary">Reset Form</button>
                             <button type="button" class="btn-secondary" id="cancelInstructorForm">Cancel</button>
                         </div>
                     </form>
                 </div>
 
+                <!-- Instructor Table -->
                 <div class="instructor-table">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>Instructor ID</th>
                                 <th>Name</th>
                                 <th>Department</th>
-                                <th>Email</th>
+                                <th>Courses</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -264,6 +406,5 @@
             </section>
         </main>
     </div>
-    <script src="js/admin-dashboard.js"></script>
 </body>
 </html> 
