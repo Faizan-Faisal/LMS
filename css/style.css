@@ -74,83 +74,69 @@ body {
   background-color: #0d6efd;
   /* cursor: pointer; */
 }
-/* Admin Login Text */
-.admin-login {
-  font-size: 20px;
-  color: red;
+/* Instructor Login Text */
+.instructor-login {
+  color: #007bff;
   text-decoration: none;
-  text-align: center;
+  font-size: 1.2em;
+  transition: color 0.3s ease;
 }
 
-.admin-login:hover {
-  text-decoration: underline;
+.instructor-login:hover {
+  color: #0056b3;
 }
 
-/* Admin Page Styles */
-
-.admin-container {
-  width: 300px;
-  margin: 100px auto;
+/* Instructor Page Styles */
+.instructor-container {
+  max-width: 400px;
+  margin: 50px auto;
   padding: 20px;
+  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.instructor-container h2 {
   text-align: center;
-  background: #f8f9fa;
+  color: #333;
 }
 
-.admin-container h2 {
-  margin-bottom: 20px;
-}
-
-.admin-container input {
-  width: 100%;
-  padding: 8px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.admin-forgetPassword {
-  font-size: 13px;
-  float: right;
-  padding: 5px;
-  /* margin: 8px 0; */
-  color: red;
-  text-align: right;
-  text-decoration: none;
-}
-
-.admin-forgetPassword:hover {
-  text-decoration: underline;
-}
-
-.admin-container button {
+.instructor-container input {
   width: 100%;
   padding: 10px;
-  background: blue;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.instructor-forgetPassword {
+  display: block;
+  text-align: right;
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9em;
+  margin: 10px 0;
+}
+
+.instructor-forgetPassword:hover {
+  color: #333;
+}
+
+.instructor-container button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
   color: white;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
-  border-radius: 5px;
-  font-size: 16px;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
 }
 
-.admin-container button:hover {
-  background: darkblue;
-}
-.admin-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.admin-form {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
+.instructor-container button:hover {
+  background-color: #0056b3;
 }
 
 /* Responsive Design */

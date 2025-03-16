@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instructor Login</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="instructor-container">
+      <div class="left-side">
+        <img src="assets/login.png" alt="Login" />
+      </div>
+      <div class="right-side">
+        <h2>Instructor Login</h2>
+        <form action="dashboard.html">
+          <label for="instructor-email">User Name</label>
+          <input type="text" id="instructor-email" name="instructor-email" required />
+
+          <label for="instructor-password">Password</label>
+          <input
+            type="password"
+            id="instructor-password"
+            name="instructor-password"
+            required
+          />
+          <h3>
+            <a href="forgetPassword.html" class="instructor-forgetPassword"
+              >Forget Password</a
+            >
+          </h3>
+          <!-- <h3 class="instructor-forgetPassword">.</h3> -->
+          <button type="submit" class="instructor-login-btn">Login</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
