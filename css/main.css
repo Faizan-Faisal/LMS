@@ -1,0 +1,16 @@
+/* Main CSS file - imports all other CSS files */
+@import 'layouts/login.css';
+@import 'layouts/dashboard.css';
+@import 'layouts/sidebar.css';
+@import 'layouts/header.css';
+@import 'components/buttons.css';
+@import 'components/forms.css';
+@import 'components/tables.css';
+@import 'components/modal.css';
+@import 'components/notifications.css';
+@import 'components/status.css';
+@import 'components/cards.css';
+@import 'components/admin.css';
+@import 'utils/responsive.css';
+@import 'utils/animations.css';
+@import 'utils/helpers.css'; 

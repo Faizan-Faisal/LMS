@@ -1,0 +1,92 @@
+/* Status Component Styles */
+.status-active,
+.status-inactive,
+.status-pending,
+.status-resolved,
+.status-pass,
+.status-fail,
+.status-absent {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-resolved {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-pass {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-fail {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-absent {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Status Icons */
+.status-active::before,
+.status-inactive::before,
+.status-pending::before,
+.status-resolved::before,
+.status-pass::before,
+.status-fail::before,
+.status-absent::before {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.status-active::before {
+    background-color: #28a745;
+}
+
+.status-inactive::before {
+    background-color: #dc3545;
+}
+
+.status-pending::before {
+    background-color: #ffc107;
+}
+
+.status-resolved::before {
+    background-color: #17a2b8;
+}
+
+.status-pass::before {
+    background-color: #28a745;
+}
+
+.status-fail::before {
+    background-color: #dc3545;
+}
+
+.status-absent::before {
+    background-color: #ffc107;
+} 

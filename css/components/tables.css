@@ -1,0 +1,225 @@
+/* Table Component Styles */
+.student-table,
+.instructor-table,
+.course-table,
+.attendance-table,
+.exam-table,
+.feedback-table {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.student-table table,
+.instructor-table table,
+.course-table table,
+.attendance-table table,
+.exam-table table,
+.feedback-table table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 0;
+}
+
+/* Table Headers */
+.student-table th,
+.instructor-table th,
+.course-table th,
+.attendance-table th,
+.exam-table th,
+.feedback-table th {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Table Cells */
+.student-table td,
+.instructor-table td,
+.course-table td,
+.attendance-table td,
+.exam-table td,
+.feedback-table td {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    color: #495057;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+/* Table Row Hover */
+.student-table tr:hover,
+.instructor-table tr:hover,
+.course-table tr:hover,
+.attendance-table tr:hover,
+.exam-table tr:hover,
+.feedback-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Action Column */
+.student-table th:last-child,
+.instructor-table th:last-child,
+.course-table th:last-child,
+.attendance-table th:last-child,
+.exam-table th:last-child,
+.feedback-table th:last-child {
+    width: 120px;
+    text-align: center;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.action-buttons button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.action-buttons .btn-view {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.action-buttons .btn-edit {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.action-buttons .btn-delete {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.action-buttons button:hover {
+    opacity: 0.9;
+}
+
+/* Course Table Specific */
+.course-capacity {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.course-capacity .progress-bar {
+    width: 60px;
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.course-capacity .progress {
+    height: 100%;
+    background-color: #28a745;
+    transition: width 0.3s ease;
+}
+
+.course-capacity.warning .progress {
+    background-color: #ffc107;
+}
+
+.course-capacity.danger .progress {
+    background-color: #dc3545;
+}
+
+.course-schedule {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.course-schedule i {
+    color: #6c757d;
+}
+
+.course-room {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.course-room i {
+    color: #6c757d;
+}
+
+/* Student Details Table */
+.student-details-table {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.student-details-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.student-details-table th,
+.student-details-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.student-details-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.student-details-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Responsive Tables */
+@media (max-width: 768px) {
+    .student-table,
+    .instructor-table,
+    .course-table,
+    .attendance-table,
+    .exam-table,
+    .feedback-table {
+        margin: 0 -20px;
+        border-radius: 0;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons button {
+        width: 100%;
+    }
+
+    .course-capacity .progress-bar {
+        width: 40px;
+    }
+
+    .course-room {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+} 

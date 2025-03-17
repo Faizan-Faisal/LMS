@@ -147,10 +147,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>
                     <button class="btn-primary" onclick="editCourse('${course.id}')">
                         <i class="fas fa-edit"></i>
-                    </button>
+                        </button>
                     <button class="btn-secondary" onclick="updateStatus('${course.id}')">
                         <i class="fas fa-sync"></i>
-                    </button>
+                        </button>
                 </td>
             </tr>
         `).join('');
