@@ -1,53 +1,9 @@
 // Sample data for testing
-let students = [
-    {
-        id: "STD001",
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@example.com",
-        phone: "123-456-7890",
-        cnic: "12345-1234567-1",
-        dob: "2000-01-01",
-        gender: "male",
-        class: "9",
-        section: "Computer Science",
-        address: "123 Main St",
-        status: "Active"
-    }
-];
+let students = [];
 
-let instructors = [
-    {
-        id: "INS001",
-        firstName: "Jane",
-        lastName: "Smith",
-        email: "jane.smith@example.com",
-        phone: "123-456-7890",
-        cnic: "12345-1234567-2",
-        department: "Computer Science",
-        qualification: "Ph.D.",
-        specialization: "Machine Learning",
-        experience: 5,
-        courses: ["Computer Science 101", "Computer Science 102"],
-        status: "Active"
-    }
-];
+let instructors = [];
 
-let courses = [
-    {
-        id: "CS101",
-        name: "Computer Science 101",
-        class: "9",
-        section: "Computer Science",
-        instructor: "Jane Smith",
-        students: 25,
-        capacity: 30,
-        schedule: "Mon, Wed 10:00 AM - 11:30 AM",
-        room: "Room 101",
-        description: "Introduction to Computer Science",
-        status: "Active"
-    }
-];
+let courses = [];
 
 let attendanceRecords = [
     {
@@ -258,21 +214,37 @@ document.addEventListener('DOMContentLoaded', function() {
     showInstructorForm?.addEventListener('click', () => {
         instructorFormContainer.style.display = 'block';
         instructorForm.reset();
+        clearValidationStates(instructorForm);
     });
 
     cancelInstructorForm?.addEventListener('click', () => {
         instructorFormContainer.style.display = 'none';
         instructorForm.reset();
+        clearValidationStates(instructorForm);
     });
 
     // Handle instructor form submission
     instructorForm?.addEventListener('submit', (e) => {
         e.preventDefault();
+        
+        if (!validateInstructorForm(instructorForm)) {
+            showNotification('Please fill all required fields correctly', 'error');
+            return;
+        }
+
         const formData = new FormData(instructorForm);
+        const instructorId = formData.get('instructorId');
+        
+        // Validate instructor ID format
+        if (!/^INS\d{3}$/.test(instructorId)) {
+            showNotification('Instructor ID must be in format: INS001', 'error');
+            return;
+        }
+
         const selectedCourses = Array.from(document.getElementById('assignedCourses').selectedOptions).map(option => option.text);
         
         const newInstructor = {
-            id: formData.get('instructorId'),
+            id: instructorId,
             firstName: formData.get('firstName'),
             lastName: formData.get('lastName'),
             email: formData.get('email'),
@@ -298,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInstructorTable();
         instructorForm.reset();
         instructorFormContainer.style.display = 'none';
+        clearValidationStates(instructorForm);
         updateDashboardStats();
     });
 
@@ -686,6 +659,106 @@ document.addEventListener('DOMContentLoaded', function() {
     filterAttendanceRecords();
     filterExamRecords();
     filterFeedbackRecords();
+
+    // Update Course Form Event Handlers
+    const updateCourseForm = document.getElementById('updateCourseForm');
+    const cancelUpdateCourseForm = document.getElementById('cancelUpdateCourseForm');
+
+    // Cancel Update Course Form
+    cancelUpdateCourseForm?.addEventListener('click', () => {
+        document.getElementById('updateCourseFormContainer').style.display = 'none';
+        document.getElementById('updateCourseError').style.display = 'none';
+        updateCourseForm.reset();
+    });
+
+    // Handle Update Course Form Submission
+    updateCourseForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const courseId = document.getElementById('updateCourseId').value;
+        const courseName = document.getElementById('updateCourseName').value;
+        
+        // Find the course in our data
+        const course = courses.find(c => c.id === courseId);
+        const errorDiv = document.getElementById('updateCourseError');
+        
+        if (!course) {
+            errorDiv.textContent = 'Error: Course ID not found!';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        if (course.name !== courseName) {
+            errorDiv.textContent = 'Error: Course name does not match with the provided Course ID!';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // If validation passes, collect the updated data
+        const updatedCourse = {
+            id: courseId,
+            name: courseName,
+            class: document.getElementById('updateCourseClass').value,
+            section: document.getElementById('updateCourseSection').value,
+            instructor: document.getElementById('updateCourseInstructor').value,
+            students: course.students, // Preserve current student count
+            capacity: parseInt(document.getElementById('updateCourseCapacity').value),
+            schedule: document.getElementById('updateCourseSchedule').value,
+            room: document.getElementById('updateCourseRoom').value,
+            description: document.getElementById('updateCourseDescription').value,
+            status: course.status // Preserve current status
+        };
+
+        // Update the course in our data
+        const index = courses.findIndex(c => c.id === courseId);
+        if (index !== -1) {
+            courses[index] = updatedCourse;
+            
+            // Show success message
+            errorDiv.style.color = 'green';
+            errorDiv.textContent = 'Course updated successfully!';
+            errorDiv.style.display = 'block';
+
+            // Reset form after 2 seconds
+            setTimeout(() => {
+                document.getElementById('updateCourseFormContainer').style.display = 'none';
+                errorDiv.style.display = 'none';
+                updateCourseForm.reset();
+            }, 2000);
+
+            // Refresh the course table
+            updateCourseTable();
+            showNotification('Course updated successfully!', 'success');
+        }
+    });
+
+    // Update section options when class is changed in update form
+    document.getElementById('updateCourseClass')?.addEventListener('change', () => {
+        const classSelect = document.getElementById('updateCourseClass');
+        const sectionSelect = document.getElementById('updateCourseSection');
+        const selectedClass = classSelect.value;
+
+        // Clear existing options
+        sectionSelect.innerHTML = '<option value="">Select Section</option>';
+
+        if (selectedClass === '9' || selectedClass === '10') {
+            const sections = ['Computer Science', 'Biology'];
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionSelect.appendChild(option);
+            });
+        } else if (selectedClass === '11' || selectedClass === '12') {
+            const sections = ['Pre-Medical', 'Pre-Engineering'];
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionSelect.appendChild(option);
+            });
+        }
+    });
 });
 
 // Helper Functions
@@ -749,19 +822,21 @@ function updateInstructorTable(instructorList = instructors) {
         row.innerHTML = `
             <td>${instructor.id}</td>
             <td>${instructor.firstName} ${instructor.lastName}</td>
-            <td>${instructor.department}</td>
-            <td>${instructor.courses.join(', ')}</td>
+            <td>${instructor.email || 'null'}</td>
+            <td>${instructor.courses.length > 0 ? instructor.courses.join(', ') : 'No courses assigned'}</td>
             <td><span class="status-${instructor.status.toLowerCase()}">${instructor.status}</span></td>
             <td>
-                <button class="btn-action btn-view" onclick="viewInstructor('${instructor.id}')" title="View Details">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn-action btn-edit" onclick="editInstructor('${instructor.id}')" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-action btn-delete" onclick="deleteInstructor('${instructor.id}')" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div class="action-buttons">
+                    <button class="btn-action btn-view" onclick="viewInstructor('${instructor.id}')" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action btn-edit" onclick="editInstructor('${instructor.id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-action btn-delete" onclick="deleteInstructor('${instructor.id}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(row);
@@ -799,14 +874,13 @@ function viewInstructor(instructorId) {
             - Email: ${instructor.email}
             - Phone: ${instructor.phone}
             - CNIC: ${instructor.cnic}
-            - Department: ${instructor.department}
             - Qualification: ${instructor.qualification}
             - Specialization: ${instructor.specialization}
             - Experience: ${instructor.experience}
-            - Courses: ${instructor.courses.join(', ')}
+             - Courses: ${instructor.courses.length > 0 ? instructor.courses.join(', ') : 'No courses assigned'}
             - Status: ${instructor.status}
         `;
-        alert(details); // In a real app, use a modal or detailed view
+        alert(details);
     }
 }
 
@@ -936,6 +1010,57 @@ function validateStudentForm(form) {
     return isValid;
 }
 
+function validateInstructorForm(form) {
+    let isValid = true;
+    
+    // Required fields
+    const requiredFields = ['instructorId', 'firstName', 'lastName', 'email', 'phone', 'cnic'];
+    
+    requiredFields.forEach(field => {
+        const input = form[field];
+        if (!input.value.trim()) {
+            markInvalid(input, 'This field is required');
+            isValid = false;
+        } else {
+            markValid(input);
+        }
+    });
+
+    // Instructor ID validation
+    const instructorIdInput = form['instructorId'];
+    const instructorIdPattern = /^INS\d{3}$/;
+    if (instructorIdInput.value && !instructorIdPattern.test(instructorIdInput.value)) {
+        markInvalid(instructorIdInput, 'Instructor ID must be in format: INS001');
+        isValid = false;
+    }
+
+    // Email validation
+    const emailInput = form['email'];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailInput.value && !emailPattern.test(emailInput.value)) {
+        markInvalid(emailInput, 'Please enter a valid email address');
+        isValid = false;
+    }
+
+    // Phone validation
+    const phoneInput = form['phone'];
+    const phonePattern = /^3\d{2}-\d{4}-\d{3}$/;
+    if (phoneInput.value && !phonePattern.test(phoneInput.value)) {
+        markInvalid(phoneInput, 'Please enter phone in format: 3XX-XXXX-XXX');
+        isValid = false;
+    }
+
+    // CNIC validation
+    const cnicInput = form['cnic'];
+    const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
+    if (cnicInput.value && !cnicPattern.test(cnicInput.value)) {
+        markInvalid(cnicInput, 'Please enter CNIC in format: 12345-1234567-1');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
 function markInvalid(input, message) {
     input.classList.add('is-invalid');
     input.classList.remove('is-valid');
@@ -1040,7 +1165,7 @@ function updateCourseTable(courseList = courses) {
     if (courseList.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="10" class="text-center">No courses found</td>
+                <td colspan="6" class="text-center">No courses found</td>
             </tr>
         `;
         return;
@@ -1051,12 +1176,8 @@ function updateCourseTable(courseList = courses) {
         row.innerHTML = `
             <td>${course.id}</td>
             <td>${course.name}</td>
-            <td>${course.class}th Class</td>
-            <td>${course.section}</td>
             <td>${course.instructor}</td>
             <td>${course.students}/${course.capacity}</td>
-            <td>${course.schedule}</td>
-            <td>${course.room}</td>
             <td><span class="status-${course.status.toLowerCase()}">${course.status}</span></td>
             <td>
                 <div class="action-buttons">
@@ -1099,22 +1220,35 @@ function viewCourse(courseId) {
 function editCourse(courseId) {
     const course = courses.find(c => c.id === courseId);
     if (course) {
-        const form = document.getElementById('courseForm');
-        form.courseCode.value = course.id;
-        form.courseName.value = course.name;
-        form.courseClass.value = course.class;
+        // Update instructor options first
+        const updateInstructorSelect = document.getElementById('updateCourseInstructor');
+        if (updateInstructorSelect) {
+            // Clear existing options
+            updateInstructorSelect.innerHTML = '<option value="">Select Instructor</option>';
+            
+            // Add instructor options
+            instructors.forEach(instructor => {
+                const option = document.createElement('option');
+                const instructorName = `${instructor.firstName} ${instructor.lastName}`;
+                option.value = instructorName;
+                option.textContent = instructorName;
+                updateInstructorSelect.appendChild(option);
+            });
+        }
+
+        // Show update form and populate fields
+        document.getElementById('updateCourseId').value = course.id;
+        document.getElementById('updateCourseName').value = course.name;
+        document.getElementById('updateCourseClass').value = course.class;
+        document.getElementById('updateCourseSection').value = course.section;
+        document.getElementById('updateCourseInstructor').value = course.instructor;
+        document.getElementById('updateCourseCapacity').value = course.capacity;
+        document.getElementById('updateCourseSchedule').value = course.schedule;
+        document.getElementById('updateCourseRoom').value = course.room;
+        document.getElementById('updateCourseDescription').value = course.description;
         
-        // Update section options before setting the value
-        updateCourseSectionOptions();
-        form.courseSection.value = course.section;
-        
-        form.courseInstructor.value = course.instructor;
-        form.courseCapacity.value = course.capacity;
-        form.courseSchedule.value = course.schedule;
-        form.courseRoom.value = course.room;
-        form.courseDescription.value = course.description;
-        
-        document.getElementById('courseFormContainer').style.display = 'block';
+        document.getElementById('updateCourseFormContainer').style.display = 'block';
+        document.getElementById('updateCourseError').style.display = 'none';
         showNotification('Edit course information', 'info');
     }
 }

@@ -1,0 +1,117 @@
+<!-- Instructor Dashboard -->
+<div class="dashboard-section" id="dashboard">
+    <div class="dashboard-header">
+        <h2>Instructor Dashboard</h2>
+        <div class="header-actions">
+            <button class="btn-primary" onclick="refreshDashboard()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Instructor Profile Card -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-info">
+                <h3 id="instructorName">Loading...</h3>
+                <p id="instructorId">Loading...</p>
+            </div>
+        </div>
+        <div class="profile-details">
+            <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span id="instructorEmail">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Phone:</span>
+                <span id="instructorPhone">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">CNIC:</span>
+                <span id="instructorCNIC">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Department:</span>
+                <span id="instructorDepartment">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Qualification:</span>
+                <span id="instructorQualification">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Specialization:</span>
+                <span id="instructorSpecialization">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Experience:</span>
+                <span id="instructorExperience">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span id="instructorStatus">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Assigned Courses</h3>
+                <p id="assignedCoursesCount">0</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Students</h3>
+                <p id="totalStudentsCount">0</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Today's Classes</h3>
+                <p id="todaysClassesCount">0</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Hours/Week</h3>
+                <p id="totalHoursCount">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Schedule -->
+    <div class="schedule-section">
+        <div class="section-header">
+            <h3>Course Schedule</h3>
+            <div class="schedule-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="scheduleSearch" placeholder="Search courses...">
+                </div>
+                <button class="btn-secondary" onclick="refreshSchedule()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+        </div>
+        <div class="schedule-grid" id="courseScheduleGrid">
+            <!-- Schedule cards will be populated here -->
+        </div>
+    </div>
+</div> 

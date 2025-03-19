@@ -99,7 +99,7 @@
                 <div id="studentFormContainer" class="registration-form" style="display: none;">
                     <h3>Register New Student</h3>
                     <form id="studentForm">
-                        <div class="form-grid">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="studentId">Student ID</label>
                                 <input type="text" id="studentId" name="studentId" placeholder="e.g., STD001" required>
@@ -112,6 +112,8 @@
                                 <label for="lastName">Last Name</label>
                                 <input type="text" id="lastName" name="lastName" required>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="email">Email</label>
                                 <input type="email" id="email" name="email" placeholder="example@email.com" required>
@@ -124,6 +126,8 @@
                                 <label for="cnic">CNIC</label>
                                 <input type="text" id="cnic" name="cnic" placeholder="12345-1234567-1" required>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="dob">Date of Birth</label>
                                 <input type="date" id="dob" name="dob" required>
@@ -147,12 +151,16 @@
                                     <option value="12">12th Class</option>
                                 </select>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="section">Section</label>
                                 <select id="section" name="section" required>
                                     <option value="">Select Class First</option>
                                 </select>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group full-width">
                                 <label for="address">Address</label>
                                 <textarea id="address" name="address" rows="3" required></textarea>
@@ -213,10 +221,11 @@
                 <div id="instructorFormContainer" class="registration-form" style="display: none;">
                     <h3>Register New Instructor</h3>
                     <form id="instructorForm">
-                        <div class="form-grid">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="instructorId">Instructor ID</label>
-                                <input type="text" id="instructorId" name="instructorId" required>
+                                <input type="text" id="instructorId" name="instructorId" placeholder="e.g., INS001" required>
+                                <small>Must start with INS followed by 3 digits</small>
                             </div>
                             <div class="form-group">
                                 <label for="firstName">First Name</label>
@@ -226,6 +235,8 @@
                                 <label for="lastName">Last Name</label>
                                 <input type="text" id="lastName" name="lastName" required>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="email">Email</label>
                                 <input type="email" id="email" name="email" required>
@@ -238,16 +249,8 @@
                                 <label for="cnic">CNIC</label>
                                 <input type="text" id="cnic" name="cnic" placeholder="12345-1234567-1" required>
                             </div>
-                            <div class="form-group">
-                                <label for="department">Department</label>
-                                <select id="department" name="department" required>
-                                    <option value="">Select Department</option>
-                                    <option value="cs">Computer Science</option>
-                                    <option value="math">Mathematics</option>
-                                    <option value="eng">Engineering</option>
-                                    <option value="physics">Physics</option>
-                                </select>
-                            </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="qualification">Qualification</label>
                                 <input type="text" id="qualification" name="qualification" required>
@@ -260,16 +263,14 @@
                                 <label for="experience">Years of Experience</label>
                                 <input type="number" id="experience" name="experience" min="0" required>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group full-width">
                                 <label for="assignedCourses">Assigned Courses</label>
                                 <select id="assignedCourses" name="assignedCourses" multiple required>
-                                    <option value="cs101">Computer Science 101</option>
-                                    <option value="cs102">Computer Science 102</option>
-                                    <option value="math101">Mathematics 101</option>
-                                    <option value="eng101">Engineering 101</option>
-                                    <option value="physics101">Physics 101</option>
+                                    <option value="">No courses assigned</option>
                                 </select>
-                                <small>Hold Ctrl/Cmd to select multiple courses</small>
+                                <small>Courses will be assigned later</small>
                             </div>
                         </div>
                         <div class="form-actions">
@@ -289,7 +290,7 @@
                                     <th>Instructor ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Department</th>
+                                    <th>Courses</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -324,7 +325,7 @@
                 <div id="courseFormContainer" class="registration-form" style="display: none;">
                     <h3>Add New Course</h3>
                     <form id="courseForm">
-                        <div class="form-grid">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="courseCode">Course Code</label>
                                 <input type="text" id="courseCode" name="courseCode" placeholder="e.g., CS101" required>
@@ -343,6 +344,8 @@
                                     <option value="12">12th Class</option>
                                 </select>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="courseSection">Section</label>
                                 <select id="courseSection" name="courseSection" required>
@@ -359,6 +362,8 @@
                                 <label for="courseCapacity">Student Capacity</label>
                                 <input type="number" id="courseCapacity" name="courseCapacity" min="1" required>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="courseSchedule">Schedule</label>
                                 <input type="text" id="courseSchedule" name="courseSchedule" placeholder="e.g., Mon, Wed 10:00 AM - 11:30 AM" required>
@@ -367,6 +372,8 @@
                                 <label for="courseRoom">Room Number</label>
                                 <input type="text" id="courseRoom" name="courseRoom" required>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group full-width">
                                 <label for="courseDescription">Course Description</label>
                                 <textarea id="courseDescription" name="courseDescription" rows="3" required></textarea>
@@ -380,6 +387,81 @@
                                 <i class="fas fa-undo"></i> Reset Form
                             </button>
                             <button type="button" class="btn-secondary" id="cancelCourseForm">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Update Course Form -->
+                <div id="updateCourseFormContainer" class="registration-form" style="display: none;">
+                    <h3>Update Course</h3>
+                    <div id="updateCourseError" class="error-message" style="display: none; color: red; margin-bottom: 15px;"></div>
+                    <form id="updateCourseForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="updateCourseId">Course ID*</label>
+                                <input type="text" id="updateCourseId" name="updateCourseId" placeholder="e.g., CS101" required>
+                                <small>Enter existing course ID</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="updateCourseName">Course Name*</label>
+                                <input type="text" id="updateCourseName" name="updateCourseName" required>
+                                <small>Must match with existing course name</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="updateCourseClass">Class</label>
+                                <select id="updateCourseClass" name="updateCourseClass">
+                                    <option value="">Select Class</option>
+                                    <option value="9">9th Class</option>
+                                    <option value="10">10th Class</option>
+                                    <option value="11">11th Class</option>
+                                    <option value="12">12th Class</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="updateCourseSection">Section</label>
+                                <select id="updateCourseSection" name="updateCourseSection">
+                                    <option value="">Select Class First</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="updateCourseInstructor">Instructor</label>
+                                <select id="updateCourseInstructor" name="updateCourseInstructor">
+                                    <option value="">Select Instructor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="updateCourseCapacity">Student Capacity</label>
+                                <input type="number" id="updateCourseCapacity" name="updateCourseCapacity" min="1">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="updateCourseSchedule">Schedule</label>
+                                <input type="text" id="updateCourseSchedule" name="updateCourseSchedule" placeholder="e.g., Mon, Wed 10:00 AM - 11:30 AM">
+                            </div>
+                            <div class="form-group">
+                                <label for="updateCourseRoom">Room Number</label>
+                                <input type="text" id="updateCourseRoom" name="updateCourseRoom">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="updateCourseDescription">Course Description</label>
+                                <textarea id="updateCourseDescription" name="updateCourseDescription" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Update Course
+                            </button>
+                            <button type="reset" class="btn-secondary">
+                                <i class="fas fa-undo"></i> Reset Form
+                            </button>
+                            <button type="button" class="btn-secondary" id="cancelUpdateCourseForm">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Portal - LMS</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components/sidebar.css">
+    <link rel="stylesheet" href="css/components/instructor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Instructor Portal</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="#dashboard" onclick="showSection('dashboard')">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#attendance" onclick="showSection('attendance')">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#assignments" onclick="showSection('assignments')">
+                            <i class="fas fa-tasks"></i>
+                            <span>Assignments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#grades" onclick="showSection('grades')">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Grades</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#announcements" onclick="showSection('announcements')">
+                            <i class="fas fa-bullhorn"></i>
+                            <span>Announcements</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#messages" onclick="showSection('messages')">
+                            <i class="fas fa-envelope"></i>
+                            <span>Messages</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#settings" onclick="showSection('settings')">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="user-menu">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="images/avatar.png" alt="User Avatar" class="avatar">
+                        <span class="user-name">John Doe</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Include the instructor dashboard -->
+                <div id="dashboard" class="section active">
+                    <!-- Instructor Dashboard content will be loaded here -->
+                </div>
+
+                <!-- Other sections -->
+                <div id="attendance" class="section">
+                    <h2>Attendance Management</h2>
+                    <!-- Attendance content -->
+                </div>
+
+                <div id="assignments" class="section">
+                    <h2>Assignments</h2>
+                    <!-- Assignments content -->
+                </div>
+
+                <div id="grades" class="section">
+                    <h2>Grades Management</h2>
+                    <!-- Grades content -->
+                </div>
+
+                <div id="announcements" class="section">
+                    <h2>Announcements</h2>
+                    <!-- Announcements content -->
+                </div>
+
+                <div id="messages" class="section">
+                    <h2>Messages</h2>
+                    <!-- Messages content -->
+                </div>
+
+                <div id="settings" class="section">
+                    <h2>Settings</h2>
+                    <!-- Settings content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/instructor-dashboard.js"></script>
+    <script>
+        // Function to show selected section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.classList.add('active');
+            }
+
+            // Update active state in sidebar
+            document.querySelectorAll('.sidebar-nav li').forEach(item => {
+                item.classList.remove('active');
+            });
+            const activeLink = document.querySelector(`.sidebar-nav a[href="#${sectionId}"]`);
+            if (activeLink) {
+                activeLink.parentElement.classList.add('active');
+            }
+        }
+
+        // Load dashboard content when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const dashboardSection = document.getElementById('dashboard');
+            if (dashboardSection) {
+                // Load the dashboard HTML content
+                fetch('instructor-dashboard.html')
+                    .then(response => response.text())
+                    .then(html => {
+                        dashboardSection.innerHTML = html;
+                        // Initialize dashboard functionality
+                        if (typeof updateInstructorProfile === 'function') {
+                            updateInstructorProfile();
+                            updateDashboardStats();
+                            updateAssignedCourses();
+                            setupEventListeners();
+                        }
+                    })
+                    .catch(error => console.error('Error loading dashboard:', error));
+            }
+        });
+    </script>
+</body>
+</html> 
