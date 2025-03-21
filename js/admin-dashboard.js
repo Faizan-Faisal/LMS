@@ -48,6 +48,22 @@ let studentFeedback = [
     }
 ];
 
+// Sample data for course assignments
+let courseAssignments = [];
+
+// Add this at the top with other data arrays
+let departments = [
+    'Computer Science',
+    'Mathematics',
+    'Physics',
+    'Chemistry',
+    'Biology',
+    'English'
+];
+
+// Add this with other data arrays at the top
+let announcements = [];
+
 // Section Navigation
 document.addEventListener('DOMContentLoaded', function() {
     // Get all sections
@@ -127,15 +143,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Show/Hide student registration form
     showStudentForm?.addEventListener('click', () => {
-        studentFormContainer.style.display = 'block';
-        studentForm.reset();
-        clearValidationStates(studentForm);
+        resetStudentForm();
+        document.getElementById('studentFormContainer').style.display = 'block';
     });
 
     cancelStudentForm?.addEventListener('click', () => {
-        studentFormContainer.style.display = 'none';
-        studentForm.reset();
-        clearValidationStates(studentForm);
+        resetStudentForm();
+        document.getElementById('studentFormContainer').style.display = 'none';
     });
 
     // Handle student form submission
@@ -155,13 +169,17 @@ document.addEventListener('DOMContentLoaded', function() {
             email: formData.get('email'),
             phone: formData.get('phone'),
             cnic: formData.get('cnic'),
-            dob: formData.get('dob'),
-            gender: formData.get('gender'),
-            class: formData.get('class'),
-            section: formData.get('section'),
+            program: formData.get('program'),
+            enrollmentYear: formData.get('enrollmentYear'),
             address: formData.get('address'),
-            status: 'Active'
+            status: formData.get('studentStatus') || 'Active'
         };
+
+        // Validate student ID format
+        if (!/^STD\d{3}$/.test(newStudent.id)) {
+            showNotification('Student ID must be in format: STD001', 'error');
+            return;
+        }
 
         const existingIndex = students.findIndex(s => s.id === newStudent.id);
         if (existingIndex >= 0) {
@@ -186,9 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             student.firstName.toLowerCase().includes(searchTerm) ||
             student.lastName.toLowerCase().includes(searchTerm) ||
             student.email.toLowerCase().includes(searchTerm) ||
-            student.id.toLowerCase().includes(searchTerm) ||
-            student.class.toString().includes(searchTerm) ||
-            student.section.toLowerCase().includes(searchTerm)
+            student.id.toLowerCase().includes(searchTerm)
         );
         updateStudentTable(filteredStudents);
     });
@@ -212,76 +228,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Show/Hide instructor registration form
     showInstructorForm?.addEventListener('click', () => {
-        instructorFormContainer.style.display = 'block';
-        instructorForm.reset();
-        clearValidationStates(instructorForm);
+        resetInstructorForm();
+        document.getElementById('instructorFormContainer').style.display = 'block';
     });
 
     cancelInstructorForm?.addEventListener('click', () => {
-        instructorFormContainer.style.display = 'none';
-        instructorForm.reset();
-        clearValidationStates(instructorForm);
+        resetInstructorForm();
+        document.getElementById('instructorFormContainer').style.display = 'none';
     });
 
     // Handle instructor form submission
-    instructorForm?.addEventListener('submit', async (e) => {
+    instructorForm?.addEventListener('submit', (e) => {
         e.preventDefault();
-        console.log('Instructor form submission started');
-
-        try {
-            const formData = new FormData(this);
-            
-            // Log form data for debugging
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}: ${value}`);
-            }
-
-            const response = await fetch('/Project/LMS/php/register_instructor.php', {
-                method: 'POST',
-                body: formData // FormData automatically sets the correct Content-Type
-            });
-
-            console.log('Response status:', response.status);
-            const rawResponse = await response.text();
-            console.log('Raw response:', rawResponse);
-
-            let jsonResponse;
-            try {
-                jsonResponse = JSON.parse(rawResponse);
-            } catch (error) {
-                console.error('Error parsing JSON response:', error);
-                console.error('Raw response was:', rawResponse);
-                throw new Error('Invalid JSON response from server');
-            }
-
-            if (jsonResponse.success) {
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: jsonResponse.message
-                });
-
-                // Reset form and image preview
-                this.reset();
-                document.getElementById('instructor-preview').style.display = 'none';
-                document.getElementById('instructor-preview').src = '';
-
-                // Refresh instructor table if it exists
-                if (typeof updateInstructorTable === 'function') {
-                    updateInstructorTable();
-                }
-            } else {
-                throw new Error(jsonResponse.message || 'Registration failed');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: error.message || 'Failed to register instructor'
-            });
+        
+        if (!validateInstructorForm(instructorForm)) {
+            showNotification('Please fill all required fields correctly', 'error');
+            return;
         }
+
+        const formData = new FormData(instructorForm);
+        const instructorId = formData.get('instructorId');
+        
+        // Validate instructor ID format
+        if (!/^INS\d{3}$/.test(instructorId)) {
+            showNotification('Instructor ID must be in format: INS001', 'error');
+            return;
+        }
+        
+        const newInstructor = {
+            id: instructorId,
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            cnic: formData.get('cnic'),
+            department: formData.get('department'),
+            qualification: formData.get('qualification'),
+            specialization: formData.get('specialization'),
+            experience: formData.get('experience'),
+            status: formData.get('instructorStatus') || 'Active'
+        };
+
+        const existingIndex = instructors.findIndex(i => i.id === newInstructor.id);
+        if (existingIndex >= 0) {
+            instructors[existingIndex] = newInstructor;
+            showNotification('Instructor information updated successfully!', 'success');
+        } else {
+            instructors.push(newInstructor);
+            showNotification('Instructor registered successfully!', 'success');
+        }
+
+        updateInstructorTable();
+        instructorForm.reset();
+        instructorFormContainer.style.display = 'none';
+        clearValidationStates(instructorForm);
+        updateDashboardStats();
     });
 
     // Instructor search functionality
@@ -308,26 +309,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Course Management Functions
     const courseForm = document.getElementById('courseForm');
-    const showCourseForm = document.getElementById('showCourseForm');
-    const cancelCourseForm = document.getElementById('cancelCourseForm');
     const courseFormContainer = document.getElementById('courseFormContainer');
+    const assignCourseFormContainer = document.getElementById('assignCourseFormContainer');
     const courseSearch = document.getElementById('courseSearch');
     const refreshCourses = document.getElementById('refreshCourses');
-    const courseClass = document.getElementById('courseClass');
-    const courseSection = document.getElementById('courseSection');
 
-    // Show/Hide course registration form
-    showCourseForm?.addEventListener('click', () => {
+    // Add event listeners for the course management buttons
+    document.getElementById('addCourseBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
         courseFormContainer.style.display = 'block';
         courseForm.reset();
         clearValidationStates(courseForm);
         updateInstructorOptions();
     });
 
-    cancelCourseForm?.addEventListener('click', () => {
+    document.getElementById('assignCourseBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('assignCourseFormContainer').style.display = 'block';
+        loadCourseList();
+        loadDepartments();
+        updateInstructorList();
+    });
+
+    // Cancel buttons for forms
+    document.getElementById('cancelCourseForm')?.addEventListener('click', () => {
         courseFormContainer.style.display = 'none';
         courseForm.reset();
         clearValidationStates(courseForm);
+    });
+
+    document.getElementById('cancelAssignCourseForm')?.addEventListener('click', () => {
+        document.getElementById('assignCourseFormContainer').style.display = 'none';
+        document.getElementById('assignCourseForm').reset();
     });
 
     // Handle course form submission
@@ -343,20 +356,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const newCourse = {
             id: formData.get('courseCode'),
             name: formData.get('courseName'),
-            class: formData.get('courseClass'),
-            section: formData.get('courseSection'),
-            instructor: formData.get('courseInstructor'),
-            students: 0,
-            capacity: parseInt(formData.get('courseCapacity')),
-            schedule: formData.get('courseSchedule'),
-            room: formData.get('courseRoom'),
+            creditHours: parseInt(formData.get('creditHours')),
             description: formData.get('courseDescription'),
-            status: 'Active'
+            status: formData.get('courseStatus') || 'Active'
         };
 
         const existingIndex = courses.findIndex(c => c.id === newCourse.id);
         if (existingIndex >= 0) {
-            courses[existingIndex] = newCourse;
+            // Preserve existing fields that aren't in the form
+            const existingCourse = courses[existingIndex];
+            courses[existingIndex] = {
+                ...existingCourse,
+                ...newCourse
+            };
             showNotification('Course information updated successfully!', 'success');
         } else {
             courses.push(newCourse);
@@ -367,6 +379,16 @@ document.addEventListener('DOMContentLoaded', function() {
         courseForm.reset();
         courseFormContainer.style.display = 'none';
         clearValidationStates(courseForm);
+        
+        // Remove read-only state from course code field
+        courseForm.courseCode.readOnly = false;
+        courseForm.courseCode.style.backgroundColor = '';
+        
+        // Remove status field if it was added for editing
+        const statusGroup = courseForm.querySelector('.status-group');
+        if (statusGroup) {
+            statusGroup.remove();
+        }
     });
 
     // Course search functionality
@@ -375,9 +397,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const filteredCourses = courses.filter(course => 
             course.name.toLowerCase().includes(searchTerm) ||
             course.id.toLowerCase().includes(searchTerm) ||
-            course.instructor.toLowerCase().includes(searchTerm) ||
-            course.class.toString().includes(searchTerm) ||
-            course.section.toLowerCase().includes(searchTerm)
+            (course.instructor && course.instructor.toLowerCase().includes(searchTerm)) ||
+            (course.department && course.department.toLowerCase().includes(searchTerm))
         );
         updateCourseTable(filteredCourses);
     });
@@ -389,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Update section options based on class selection
-    courseClass?.addEventListener('change', () => {
+    document.getElementById('courseClass')?.addEventListener('change', () => {
         updateCourseSectionOptions();
     });
 
@@ -769,6 +790,311 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    // Assign Course Form Functions
+    function showAssignCourseForm() {
+        document.getElementById('assignCourseFormContainer').style.display = 'block';
+        loadCourseList();
+        loadDepartments();
+    }
+
+    function hideAssignCourseForm() {
+        document.getElementById('assignCourseFormContainer').style.display = 'none';
+        document.getElementById('assignCourseForm').reset();
+        document.getElementById('assignCourse').value = '';
+        document.getElementById('assignDepartment').value = '';
+        document.getElementById('assignInstructor').value = '';
+        document.getElementById('assignSchedule').value = '';
+    }
+
+    function handleAssignCourseSubmit(event) {
+        event.preventDefault();
+        
+        // Get form values
+        const courseId = document.getElementById('assignCourse').value;
+        const departmentValue = document.getElementById('assignDepartment').value;
+        const instructorId = document.getElementById('assignInstructor').value;
+        const semester = document.getElementById('assignSemester').value;
+        const schedule = document.getElementById('assignSchedule').value;
+        const preRequisite = document.getElementById('assignPreRequisite').value;
+
+        // Validate required fields
+        if (!courseId || !departmentValue || !instructorId || !semester || !schedule) {
+            showNotification('Please fill all required fields', 'error');
+            return;
+        }
+
+        // Find the course and instructor
+        const course = courses.find(c => c.id === courseId);
+        const instructor = instructors.find(i => i.id === instructorId);
+
+        if (!course || !instructor) {
+            showNotification('Invalid course or instructor selection', 'error');
+            return;
+        }
+
+        // Create the course assignment
+        const assignment = {
+            courseId: courseId,
+            courseName: course.name,
+            department: departmentValue,
+            instructorId: instructorId,
+            instructorName: `${instructor.firstName} ${instructor.lastName}`,
+            semester: semester,
+            schedule: schedule,
+            preRequisite: preRequisite || null,
+            status: 'Active',
+            dateAssigned: new Date().toISOString().split('T')[0]
+        };
+
+        // Add to course assignments
+        courseAssignments.push(assignment);
+
+        // Update the course with instructor information
+        const courseIndex = courses.findIndex(c => c.id === courseId);
+        if (courseIndex !== -1) {
+            courses[courseIndex] = {
+                ...courses[courseIndex],
+                instructor: `${instructor.firstName} ${instructor.lastName}`,
+                department: departmentValue,
+                semester: semester,
+                schedule: schedule
+            };
+        }
+
+        // Update the instructor's courses
+        const instructorIndex = instructors.findIndex(i => i.id === instructorId);
+        if (instructorIndex !== -1) {
+            if (!instructors[instructorIndex].courses) {
+                instructors[instructorIndex].courses = [];
+            }
+            instructors[instructorIndex].courses.push(courseId);
+        }
+
+        // Update tables
+        updateCourseTable();
+        updateInstructorTable();
+        
+        // Show success message
+        showNotification('Course assigned successfully!', 'success');
+        
+        // Hide and reset the form
+        document.getElementById('assignCourseFormContainer').style.display = 'none';
+        document.getElementById('assignCourseForm').reset();
+    }
+
+    function loadCourseList() {
+        const courseSelect = document.getElementById('assignCourse');
+        if (!courseSelect) return;
+
+        courseSelect.innerHTML = '<option value="">Select Course</option>';
+        
+        // Use the actual courses array instead of sample data
+        if (courses.length === 0) {
+            const option = document.createElement('option');
+            option.value = "";
+            option.textContent = "No courses available";
+            option.disabled = true;
+            courseSelect.appendChild(option);
+        } else {
+            courses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = `${course.id} - ${course.name}`;
+                courseSelect.appendChild(option);
+            });
+        }
+    }
+
+    function loadDepartments() {
+        const deptSelect = document.getElementById('assignDepartment');
+        deptSelect.innerHTML = '<option value="">Select Department</option>';
+        
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            deptSelect.appendChild(option);
+        });
+    }
+
+    function updateInstructorList() {
+        const department = document.getElementById('assignDepartment').value;
+        if (!department) return;
+
+        const instructorSelect = document.getElementById('assignInstructor');
+        instructorSelect.innerHTML = '<option value="">Select Instructor</option>';
+        
+        // Show all active instructors, with their departments in the dropdown
+        const activeInstructors = instructors.filter(inst => inst.status === 'Active');
+        
+        if (activeInstructors.length === 0) {
+            const option = document.createElement('option');
+            option.value = "";
+            option.textContent = "No instructors available";
+            option.disabled = true;
+            instructorSelect.appendChild(option);
+        } else {
+            // Group instructors by department
+            const departmentGroups = {};
+            activeInstructors.forEach(instructor => {
+                if (!departmentGroups[instructor.department]) {
+                    departmentGroups[instructor.department] = [];
+                }
+                departmentGroups[instructor.department].push(instructor);
+            });
+
+            // Create option groups for each department
+            Object.keys(departmentGroups).sort().forEach(dept => {
+                const group = document.createElement('optgroup');
+                group.label = dept;
+                
+                // Sort instructors within each department by name
+                departmentGroups[dept]
+                    .sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`))
+                    .forEach(instructor => {
+            const option = document.createElement('option');
+            option.value = instructor.id;
+                        option.textContent = `${instructor.firstName} ${instructor.lastName}`;
+                        // Highlight instructors from the selected department
+                        if (instructor.department === department) {
+                            option.style.fontWeight = 'bold';
+                        }
+                        group.appendChild(option);
+                    });
+                
+                instructorSelect.appendChild(group);
+            });
+        }
+
+        // Add help text below the select
+        let helpText = instructorSelect.nextElementSibling;
+        if (!helpText || !helpText.classList.contains('help-text')) {
+            helpText = document.createElement('small');
+            helpText.classList.add('help-text');
+            helpText.style.display = 'block';
+            helpText.style.marginTop = '5px';
+            helpText.style.color = '#666';
+            instructorSelect.parentNode.insertBefore(helpText, instructorSelect.nextSibling);
+        }
+        helpText.textContent = 'Instructors from the selected department are shown in bold. You can assign instructors from other departments as well.';
+    }
+
+    function updatePreRequisites() {
+        const courseId = document.getElementById('assignCourse').value;
+        const department = document.getElementById('assignDepartment').value;
+        const semester = document.getElementById('assignSemester').value;
+        
+        if (!courseId || !department || !semester) return;
+
+        const preReqSelect = document.getElementById('assignPreRequisite');
+        preReqSelect.innerHTML = '<option value="">Select Pre-requisite (Optional)</option>';
+        
+        // Filter courses that could be prerequisites (all courses except the current one)
+        const possiblePreReqs = courses.filter(course => course.id !== courseId);
+        
+        if (possiblePreReqs.length === 0) {
+            const option = document.createElement('option');
+            option.value = "";
+            option.textContent = "No courses available";
+            option.disabled = true;
+            preReqSelect.appendChild(option);
+        } else {
+            possiblePreReqs.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = `${course.id} - ${course.name}`;
+                preReqSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Add event listeners for the assign course form
+    document.getElementById('assignCourseForm')?.addEventListener('submit', handleAssignCourseSubmit);
+
+    // Add event listeners for form field changes
+    document.getElementById('assignDepartment')?.addEventListener('change', function() {
+        updateInstructorList();
+        updatePreRequisites();
+    });
+
+    document.getElementById('assignSemester')?.addEventListener('change', function() {
+        updatePreRequisites();
+    });
+
+    // Add event listener for Assign Course button
+    const showAssignCourseBtn = document.getElementById('showAssignCourseForm');
+    const cancelAssignCourseBtn = document.getElementById('cancelAssignCourseForm');
+
+    showAssignCourseBtn?.addEventListener('click', () => {
+        showAssignCourseForm();
+    });
+
+    cancelAssignCourseBtn?.addEventListener('click', () => {
+        hideAssignCourseForm();
+    });
+
+    // Initialize department management
+    initializeDepartmentManagement();
+    
+    // Update all department dropdowns initially
+    updateAllDepartmentDropdowns();
+
+    // Announcement Management Functions
+    const newAnnouncementBtn = document.getElementById('newAnnouncementBtn');
+    const announcementForm = document.getElementById('announcementForm');
+    const announcementFormContainer = document.getElementById('announcementFormContainer');
+    const cancelAnnouncementForm = document.getElementById('cancelAnnouncementForm');
+    const allStudentsCheckbox = document.getElementById('allStudents');
+    const studentFilters = document.getElementById('studentFilters');
+
+    // Show/Hide announcement form
+    newAnnouncementBtn?.addEventListener('click', () => {
+        announcementFormContainer.style.display = 'block';
+    });
+
+    cancelAnnouncementForm?.addEventListener('click', () => {
+        announcementFormContainer.style.display = 'none';
+        announcementForm.reset();
+    });
+
+    // Show/Hide student filters based on checkbox
+    allStudentsCheckbox?.addEventListener('change', (e) => {
+        studentFilters.style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // Handle announcement form submission
+    announcementForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(announcementForm);
+        const newAnnouncement = {
+            id: Date.now().toString(),
+            date: new Date().toISOString().split('T')[0],
+            title: formData.get('announcementTitle'),
+            message: formData.get('announcementMessage'),
+            recipients: {
+                allStudents: allStudentsCheckbox.checked,
+                allInstructors: document.getElementById('allInstructors').checked,
+                department: formData.get('departmentFilter'),
+                semester: formData.get('semesterFilter')
+            },
+            priority: formData.get('priority'),
+            validUntil: formData.get('validUntil'),
+            status: 'Active'
+        };
+
+        announcements.unshift(newAnnouncement);
+        updateAnnouncementsTable();
+        showNotification('Announcement sent successfully!', 'success');
+        
+        announcementForm.reset();
+        announcementFormContainer.style.display = 'none';
+        studentFilters.style.display = 'none';
+    });
+
+    // Initial announcements table population
+    updateAnnouncementsTable();
 });
 
 // Helper Functions
@@ -781,7 +1107,7 @@ function updateStudentTable(studentList = students) {
     if (studentList.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="text-center">No students found</td>
+                <td colspan="6" class="text-center">No students found</td>
             </tr>
         `;
         return;
@@ -793,8 +1119,7 @@ function updateStudentTable(studentList = students) {
             <td>${student.id}</td>
             <td>${student.firstName} ${student.lastName}</td>
             <td>${student.email}</td>
-            <td>${student.class}th Class</td>
-            <td>${student.section}</td>
+            <td>${student.program}</td>
             <td><span class="status-${student.status.toLowerCase()}">${student.status}</span></td>
             <td>
                 <button class="btn-action btn-view" onclick="viewStudent('${student.id}')" title="View Details">
@@ -833,7 +1158,7 @@ function updateInstructorTable(instructorList = instructors) {
             <td>${instructor.id}</td>
             <td>${instructor.firstName} ${instructor.lastName}</td>
             <td>${instructor.email || 'null'}</td>
-            <td>${instructor.courses.length > 0 ? instructor.courses.join(', ') : 'No courses assigned'}</td>
+            <td>No courses assigned</td>
             <td><span class="status-${instructor.status.toLowerCase()}">${instructor.status}</span></td>
             <td>
                 <div class="action-buttons">
@@ -853,44 +1178,158 @@ function updateInstructorTable(instructorList = instructors) {
     });
 }
 
-function viewStudent(studentId) {
-    const student = students.find(s => s.id === studentId);
-    if (student) {
-        const details = `
-            Student Details:
-            - ID: ${student.id}
-            - Name: ${student.firstName} ${student.lastName}
-            - Email: ${student.email}
-            - Phone: ${student.phone}
-            - CNIC: ${student.cnic}
-            - Date of Birth: ${student.dob}
-            - Gender: ${student.gender}
-            - Class: ${student.class}th Class
-            - Section: ${student.section}
-            - Address: ${student.address}
-            - Status: ${student.status}
-        `;
-        alert(details); // In a real app, use a modal or detailed view
-    }
-}
-
 function viewInstructor(instructorId) {
     const instructor = instructors.find(i => i.id === instructorId);
     if (instructor) {
-        const details = `
-            Instructor Details:
-            - ID: ${instructor.id}
-            - Name: ${instructor.firstName} ${instructor.lastName}
-            - Email: ${instructor.email}
-            - Phone: ${instructor.phone}
-            - CNIC: ${instructor.cnic}
-            - Qualification: ${instructor.qualification}
-            - Specialization: ${instructor.specialization}
-            - Experience: ${instructor.experience}
-             - Courses: ${instructor.courses.length > 0 ? instructor.courses.join(', ') : 'No courses assigned'}
-            - Status: ${instructor.status}
+        // Create modal HTML
+        const modalHTML = `
+            <div id="instructorDetailsModal" class="modal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1000;">
+                <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px;">
+                    <span class="close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; right: 20px; top: 10px;">&times;</span>
+                    <div class="instructor-details" style="display: flex; gap: 20px;">
+                        <div class="instructor-image" style="flex: 0 0 200px;">
+                            <img src="${instructor.picture || './images/default-avatar.png'}" alt="Instructor Picture" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
+                        </div>
+                        <div class="instructor-info" style="flex: 1;">
+                            <h2 style="margin-bottom: 20px;">Instructor Details</h2>
+                            <div class="info-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div class="info-item">
+                                    <strong>Instructor ID:</strong> ${instructor.id}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Name:</strong> ${instructor.firstName} ${instructor.lastName}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Email:</strong> ${instructor.email}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Phone:</strong> ${instructor.phone}
+                                </div>
+                                <div class="info-item">
+                                    <strong>CNIC:</strong> ${instructor.cnic}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Department:</strong> ${instructor.department}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Qualification:</strong> ${instructor.qualification}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Experience:</strong> ${instructor.experience} years
+                                </div>
+                                <div class="info-item">
+                                    <strong>Status:</strong> <span class="status-${instructor.status.toLowerCase()}" style="padding: 3px 8px; border-radius: 4px; background-color: ${instructor.status === 'Active' ? '#28a745' : '#dc3545'}; color: white;">${instructor.status}</span>
+                                </div>
+                                <div class="info-item" style="grid-column: 1 / -1;">
+                                    <strong>Specialization:</strong> ${instructor.specialization}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
-        alert(details);
+
+        // Remove any existing modal
+        const existingModal = document.getElementById('instructorDetailsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Get modal elements
+        const modal = document.getElementById('instructorDetailsModal');
+        const closeBtn = modal.querySelector('.close');
+
+        // Close modal when clicking X
+        closeBtn.addEventListener('click', function() {
+            modal.remove();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+}
+
+function viewStudent(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+        // Create modal HTML with fixed styling for close button
+        const modalHTML = `
+            <div id="studentDetailsModal" class="modal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1000;">
+                <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px; position: relative;">
+                    <span class="close" style="position: absolute; right: 10px; top: 5px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; padding: 0 5px;">&times;</span>
+                    <h2 style="margin-bottom: 20px;">Student Details</h2>
+                    <div class="student-details" style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 20px;">
+                        <div class="student-image" style="grid-row: span 2;">
+                            <img src="${student.picture || './images/default-avatar.png'}" alt="Student Picture" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
+                        </div>
+                        <div class="student-info">
+                            <div style="margin-bottom: 15px;">
+                                <strong>Student ID:</strong> ${student.id}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Name:</strong> ${student.firstName} ${student.lastName}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Email:</strong> ${student.email}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Phone:</strong> ${student.phone}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>CNIC:</strong> ${student.cnic}
+                            </div>
+                        </div>
+                        <div class="student-info">
+                            <div style="margin-bottom: 15px;">
+                                <strong>Program:</strong> ${student.program}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Enrollment Year:</strong> ${student.enrollmentYear}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Status:</strong> <span class="status-${student.status.toLowerCase()}" style="padding: 3px 8px; border-radius: 4px; background-color: ${student.status === 'Active' ? '#28a745' : '#dc3545'}; color: white;">${student.status}</span>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Address:</strong> ${student.address}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove any existing modal
+        const existingModal = document.getElementById('studentDetailsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Get modal elements
+        const modal = document.getElementById('studentDetailsModal');
+        const closeBtn = modal.querySelector('.close');
+
+        // Close modal when clicking X
+        closeBtn.addEventListener('click', function() {
+            modal.remove();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.remove();
+            }
+        });
     }
 }
 
@@ -898,21 +1337,35 @@ function editStudent(studentId) {
     const student = students.find(s => s.id === studentId);
     if (student) {
         const form = document.getElementById('studentForm');
+        
+        // Set values
         form.studentId.value = student.id;
+        form.studentId.readOnly = true; // Make ID field read-only
+        form.studentId.style.backgroundColor = '#f0f0f0'; // Visual indication that field is read-only
+        
         form.firstName.value = student.firstName;
         form.lastName.value = student.lastName;
         form.email.value = student.email;
         form.phone.value = student.phone;
         form.cnic.value = student.cnic;
-        form.dob.value = student.dob;
-        form.gender.value = student.gender;
-        form.class.value = student.class;
-        
-        // Update section options before setting the value
-        updateSectionOptions();
-        form.section.value = student.section;
-        
+        form.program.value = student.program;
+        form.enrollmentYear.value = student.enrollmentYear;
         form.address.value = student.address;
+
+        // Add status selection for edit mode
+        const statusContainer = document.createElement('div');
+        statusContainer.className = 'form-group';
+        statusContainer.innerHTML = `
+            <label for="studentStatus">Status</label>
+            <select id="studentStatus" name="studentStatus" required>
+                <option value="Active" ${student.status === 'Active' ? 'selected' : ''}>Active</option>
+                <option value="Inactive" ${student.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+            </select>
+        `;
+        
+        // Find where to insert the status field (after enrollment year)
+        const enrollmentYearField = form.querySelector('[name="enrollmentYear"]').closest('.form-group');
+        enrollmentYearField.parentNode.insertBefore(statusContainer, enrollmentYearField.nextSibling);
         
         document.getElementById('studentFormContainer').style.display = 'block';
         showNotification('Edit student information', 'info');
@@ -922,9 +1375,13 @@ function editStudent(studentId) {
 function editInstructor(instructorId) {
     const instructor = instructors.find(i => i.id === instructorId);
     if (instructor) {
-        // Populate form with instructor data
         const form = document.getElementById('instructorForm');
+        
+        // Set values
         form.instructorId.value = instructor.id;
+        form.instructorId.readOnly = true; // Make ID field read-only
+        form.instructorId.style.backgroundColor = '#f0f0f0'; // Visual indication that field is read-only
+        
         form.firstName.value = instructor.firstName;
         form.lastName.value = instructor.lastName;
         form.email.value = instructor.email;
@@ -935,15 +1392,23 @@ function editInstructor(instructorId) {
         form.specialization.value = instructor.specialization;
         form.experience.value = instructor.experience;
         
-        // Handle multiple course selection
-        const courseSelect = form.assignedCourses;
-        Array.from(courseSelect.options).forEach(option => {
-            option.selected = instructor.courses.includes(option.text);
-        });
+        // Add status selection for edit mode
+        const statusContainer = document.createElement('div');
+        statusContainer.className = 'form-group';
+        statusContainer.innerHTML = `
+            <label for="instructorStatus">Status</label>
+            <select id="instructorStatus" name="instructorStatus" required>
+                <option value="Active" ${instructor.status === 'Active' ? 'selected' : ''}>Active</option>
+                <option value="Inactive" ${instructor.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+            </select>
+        `;
         
-        // Show form
+        // Find where to insert the status field (after experience field)
+        const experienceField = form.querySelector('[name="experience"]').closest('.form-group');
+        experienceField.parentNode.insertBefore(statusContainer, experienceField.nextSibling);
+        
         document.getElementById('instructorFormContainer').style.display = 'block';
-        showNotification('Edit instructor information');
+        showNotification('Edit instructor information', 'info');
     }
 }
 
@@ -973,11 +1438,21 @@ function validateStudentForm(form) {
     let isValid = true;
     
     // Required fields
-    const requiredFields = ['studentId', 'firstName', 'lastName', 'email', 'phone', 'cnic', 'dob', 'gender', 'class'];
+    const requiredFields = [
+        'studentId', 
+        'firstName', 
+        'lastName', 
+        'email', 
+        'phone', 
+        'cnic', 
+        'program',
+        'enrollmentYear',
+        'address'
+    ];
     
     requiredFields.forEach(field => {
         const input = form[field];
-        if (!input.value.trim()) {
+        if (!input || !input.value.trim()) {
             markInvalid(input, 'This field is required');
             isValid = false;
         } else {
@@ -988,7 +1463,7 @@ function validateStudentForm(form) {
     // Email validation
     const emailInput = form['email'];
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailInput.value && !emailPattern.test(emailInput.value)) {
+    if (emailInput && emailInput.value && !emailPattern.test(emailInput.value)) {
         markInvalid(emailInput, 'Please enter a valid email address');
         isValid = false;
     }
@@ -996,7 +1471,7 @@ function validateStudentForm(form) {
     // Phone validation
     const phoneInput = form['phone'];
     const phonePattern = /^3\d{2}-\d{4}-\d{3}$/;
-    if (phoneInput.value && !phonePattern.test(phoneInput.value)) {
+    if (phoneInput && phoneInput.value && !phonePattern.test(phoneInput.value)) {
         markInvalid(phoneInput, 'Please enter phone in format: 3XX-XXXX-XXX');
         isValid = false;
     }
@@ -1004,7 +1479,7 @@ function validateStudentForm(form) {
     // CNIC validation
     const cnicInput = form['cnic'];
     const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
-    if (cnicInput.value && !cnicPattern.test(cnicInput.value)) {
+    if (cnicInput && cnicInput.value && !cnicPattern.test(cnicInput.value)) {
         markInvalid(cnicInput, 'Please enter CNIC in format: 12345-1234567-1');
         isValid = false;
     }
@@ -1012,9 +1487,20 @@ function validateStudentForm(form) {
     // Student ID validation
     const studentIdInput = form['studentId'];
     const studentIdPattern = /^STD\d{3}$/;
-    if (studentIdInput.value && !studentIdPattern.test(studentIdInput.value)) {
+    if (studentIdInput && studentIdInput.value && !studentIdPattern.test(studentIdInput.value)) {
         markInvalid(studentIdInput, 'Student ID must be in format: STD001');
         isValid = false;
+    }
+
+    // Enrollment Year validation
+    const enrollmentYearInput = form['enrollmentYear'];
+    if (enrollmentYearInput && enrollmentYearInput.value) {
+        const year = parseInt(enrollmentYearInput.value);
+        const currentYear = new Date().getFullYear();
+        if (year < 2000 || year > currentYear) {
+            markInvalid(enrollmentYearInput, `Year must be between 2000 and ${currentYear}`);
+            isValid = false;
+        }
     }
 
     return isValid;
@@ -1186,8 +1672,8 @@ function updateCourseTable(courseList = courses) {
         row.innerHTML = `
             <td>${course.id}</td>
             <td>${course.name}</td>
-            <td>${course.instructor}</td>
-            <td>${course.students}/${course.capacity}</td>
+            <td>${course.instructor || 'Not Assigned'}</td>
+            <td>${course.department || 'Not Assigned'}</td>
             <td><span class="status-${course.status.toLowerCase()}">${course.status}</span></td>
             <td>
                 <div class="action-buttons">
@@ -1210,55 +1696,115 @@ function updateCourseTable(courseList = courses) {
 function viewCourse(courseId) {
     const course = courses.find(c => c.id === courseId);
     if (course) {
-        const details = `
-            Course Details:
-            - Code: ${course.id}
-            - Name: ${course.name}
-            - Class: ${course.class}th Class
-            - Section: ${course.section}
-            - Instructor: ${course.instructor}
-            - Students: ${course.students}/${course.capacity}
-            - Schedule: ${course.schedule}
-            - Room: ${course.room}
-            - Description: ${course.description}
-            - Status: ${course.status}
+        // Create modal HTML
+        const modalHTML = `
+            <div id="courseDetailsModal" class="modal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1000;">
+                <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px; position: relative;">
+                    <span class="close" style="position: absolute; right: 10px; top: 5px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; padding: 0 5px;">&times;</span>
+                    <h2 style="margin-bottom: 20px;">Course Details</h2>
+                    <div class="course-details" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div class="course-info">
+                            <div style="margin-bottom: 15px;">
+                                <strong>Code:</strong> ${course.id}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Name:</strong> ${course.name}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Instructor:</strong> ${course.instructor || 'Not Assigned'}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Schedule:</strong> ${course.schedule || 'Not Scheduled'}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Room:</strong> ${course.room || 'Not Assigned'}
+                            </div>
+                        </div>
+                        <div class="course-info">
+                            <div style="margin-bottom: 15px;">
+                                <strong>Credit Hours:</strong> ${course.creditHours || 'Not Specified'}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Department:</strong> ${course.department || 'Not Assigned'}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Students:</strong> ${course.students || '0'}/${course.capacity || 'N/A'}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Status:</strong> <span class="status-${course.status.toLowerCase()}" style="padding: 3px 8px; border-radius: 4px; background-color: ${course.status === 'Active' ? '#28a745' : '#dc3545'}; color: white;">${course.status}</span>
+                            </div>
+                        </div>
+                        <div class="course-description" style="grid-column: 1 / -1;">
+                            <strong>Description:</strong>
+                            <p style="margin-top: 5px;">${course.description || 'No description available.'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
-        alert(details); // In a real app, use a modal or detailed view
+
+        // Remove any existing modal
+        const existingModal = document.getElementById('courseDetailsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Get modal elements
+        const modal = document.getElementById('courseDetailsModal');
+        const closeBtn = modal.querySelector('.close');
+
+        // Close modal when clicking X
+        closeBtn.addEventListener('click', function() {
+            modal.remove();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.remove();
+            }
+        });
     }
 }
 
 function editCourse(courseId) {
     const course = courses.find(c => c.id === courseId);
     if (course) {
-        // Update instructor options first
-        const updateInstructorSelect = document.getElementById('updateCourseInstructor');
-        if (updateInstructorSelect) {
-            // Clear existing options
-            updateInstructorSelect.innerHTML = '<option value="">Select Instructor</option>';
-            
-            // Add instructor options
-            instructors.forEach(instructor => {
-                const option = document.createElement('option');
-                const instructorName = `${instructor.firstName} ${instructor.lastName}`;
-                option.value = instructorName;
-                option.textContent = instructorName;
-                updateInstructorSelect.appendChild(option);
-            });
-        }
-
-        // Show update form and populate fields
-        document.getElementById('updateCourseId').value = course.id;
-        document.getElementById('updateCourseName').value = course.name;
-        document.getElementById('updateCourseClass').value = course.class;
-        document.getElementById('updateCourseSection').value = course.section;
-        document.getElementById('updateCourseInstructor').value = course.instructor;
-        document.getElementById('updateCourseCapacity').value = course.capacity;
-        document.getElementById('updateCourseSchedule').value = course.schedule;
-        document.getElementById('updateCourseRoom').value = course.room;
-        document.getElementById('updateCourseDescription').value = course.description;
+        const form = document.getElementById('courseForm');
         
-        document.getElementById('updateCourseFormContainer').style.display = 'block';
-        document.getElementById('updateCourseError').style.display = 'none';
+        // Set values
+        form.courseCode.value = course.id;
+        form.courseCode.readOnly = true; // Make ID field read-only
+        form.courseCode.style.backgroundColor = '#f0f0f0'; // Visual indication that field is read-only
+        
+        form.courseName.value = course.name;
+        form.creditHours.value = course.creditHours || '';
+        form.courseDescription.value = course.description || '';
+        
+        // Add status selection for edit mode if it doesn't exist
+        let statusContainer = form.querySelector('.form-group.status-group');
+        if (!statusContainer) {
+            statusContainer = document.createElement('div');
+            statusContainer.className = 'form-group status-group';
+            statusContainer.innerHTML = `
+                <label for="courseStatus">Status</label>
+                <select id="courseStatus" name="courseStatus" required>
+                    <option value="Active" ${course.status === 'Active' ? 'selected' : ''}>Active</option>
+                    <option value="Inactive" ${course.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                </select>
+            `;
+            
+            // Insert status field before form actions
+            const formActions = form.querySelector('.form-actions');
+            formActions.parentNode.insertBefore(statusContainer, formActions);
+        } else {
+            form.courseStatus.value = course.status;
+        }
+        
+        document.getElementById('courseFormContainer').style.display = 'block';
         showNotification('Edit course information', 'info');
     }
 }
@@ -1275,7 +1821,7 @@ function validateCourseForm(form) {
     let isValid = true;
     
     // Required fields
-    const requiredFields = ['courseCode', 'courseName', 'courseClass', 'courseSection', 'courseInstructor', 'courseCapacity', 'courseSchedule', 'courseRoom'];
+    const requiredFields = ['courseCode', 'courseName', 'creditHours', 'courseDescription'];
     
     requiredFields.forEach(field => {
         const input = form[field];
@@ -1295,10 +1841,10 @@ function validateCourseForm(form) {
         isValid = false;
     }
 
-    // Capacity validation
-    const capacityInput = form['courseCapacity'];
-    if (capacityInput.value && parseInt(capacityInput.value) < 1) {
-        markInvalid(capacityInput, 'Capacity must be at least 1');
+    // Credit Hours validation
+    const creditHoursInput = form['creditHours'];
+    if (creditHoursInput.value && (parseInt(creditHoursInput.value) < 1 || parseInt(creditHoursInput.value) > 6)) {
+        markInvalid(creditHoursInput, 'Credit hours must be between 1 and 6');
         isValid = false;
     }
 
@@ -1551,44 +2097,272 @@ function updateFeedbackStatus(studentId) {
     }
 }
 
-// Add these functions at the beginning of the file
+// Function to preview uploaded images
 function previewImage(input, previewId) {
     const preview = document.getElementById(previewId);
-    if (input.files && input.files[0]) {
+    const file = input.files[0];
+    
+    if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
-            preview.style.display = 'block';
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = 'images/default-avatar.png';
     }
 }
 
-function showInstructorForm() {
-    document.getElementById('instructorFormContainer').style.display = 'block';
+// Add these functions after other initialization code
+function initializeDepartmentManagement() {
+    const departmentForm = document.getElementById('departmentForm');
+    const departmentList = document.getElementById('departmentList');
+
+    // Initial population of department list
+    updateDepartmentList();
+
+    // Handle department form submission
+    departmentForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newDepartmentInput = document.getElementById('newDepartment');
+        const departmentName = newDepartmentInput.value.trim();
+
+        if (departmentName) {
+            if (!departments.includes(departmentName)) {
+                departments.push(departmentName);
+                updateDepartmentList();
+                updateAllDepartmentDropdowns();
+                showNotification('Department added successfully!', 'success');
+            } else {
+                showNotification('Department already exists!', 'error');
+            }
+            newDepartmentInput.value = '';
+        }
+    });
 }
 
-function closeInstructorForm() {
-    document.getElementById('instructorFormContainer').style.display = 'none';
-    document.getElementById('instructorForm').reset();
-    document.getElementById('instructorProfilePreview').src = 'images/default-avatar.png';
+function updateDepartmentList() {
+    const departmentList = document.getElementById('departmentList');
+    if (!departmentList) return;
+
+    departmentList.innerHTML = '';
+    departments.forEach(dept => {
+        const deptElement = document.createElement('div');
+        deptElement.className = 'department-item';
+        deptElement.innerHTML = `
+            <span>${dept}</span>
+            <button type="button" class="btn-delete" onclick="deleteDepartment('${dept}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        departmentList.appendChild(deptElement);
+    });
 }
 
-function showStudentForm() {
-    document.getElementById('studentFormContainer').style.display = 'block';
+function deleteDepartment(departmentName) {
+    if (confirm(`Are you sure you want to delete the department "${departmentName}"?`)) {
+        const index = departments.indexOf(departmentName);
+        if (index > -1) {
+            departments.splice(index, 1);
+            updateDepartmentList();
+            updateAllDepartmentDropdowns();
+            showNotification('Department deleted successfully!', 'success');
+        }
+    }
 }
 
-function closeStudentForm() {
-    document.getElementById('studentFormContainer').style.display = 'none';
-    document.getElementById('studentForm').reset();
-    document.getElementById('studentProfilePreview').src = 'images/default-avatar.png';
-}
+function updateAllDepartmentDropdowns() {
+    // Update instructor registration form
+    const instructorDepartment = document.getElementById('department');
+    if (instructorDepartment) {
+        const currentValue = instructorDepartment.value;
+        instructorDepartment.innerHTML = '<option value="">Select Department</option>';
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            instructorDepartment.appendChild(option);
+        });
+        instructorDepartment.value = currentValue;
+    }
 
-function showCourseForm() {
-    document.getElementById('courseFormContainer').style.display = 'block';
-}
-
-function closeCourseForm() {
-    document.getElementById('courseFormContainer').style.display = 'none';
-    document.getElementById('courseForm').reset();
+    // Update assign course form
+    const assignDepartment = document.getElementById('assignDepartment');
+    if (assignDepartment) {
+        const currentValue = assignDepartment.value;
+        assignDepartment.innerHTML = '<option value="">Select Department</option>';
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            assignDepartment.appendChild(option);
+        });
+        assignDepartment.value = currentValue;
+    }
 } 
+
+// Add function to update student status
+function updateStudentStatus(studentId, newStatus) {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+        student.status = newStatus;
+        updateStudentTable(); // Refresh the table to show the updated status
+        showNotification(`Student status updated to ${newStatus}`, 'success');
+    }
+}
+
+// Add function to reset form and remove read-only state
+function resetStudentForm() {
+    const form = document.getElementById('studentForm');
+    if (form) {
+        form.reset();
+        form.studentId.readOnly = false;
+        form.studentId.style.backgroundColor = ''; // Reset background color
+        clearValidationStates(form);
+    }
+}
+
+function resetInstructorForm() {
+    const form = document.getElementById('instructorForm');
+    if (form) {
+        form.reset();
+        form.instructorId.readOnly = false;
+        form.instructorId.style.backgroundColor = ''; // Reset background color
+        clearValidationStates(form);
+    }
+}
+
+// Add this with other update functions
+function updateAnnouncementsTable(announcementsList = announcements) {
+    const tbody = document.getElementById('announcementsTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (announcementsList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">No announcements found</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    announcementsList.forEach(announcement => {
+        const row = document.createElement('tr');
+        const recipientText = getRecipientText(announcement.recipients);
+        const isExpired = announcement.validUntil && new Date(announcement.validUntil) < new Date();
+        const status = isExpired ? 'Expired' : announcement.status;
+        
+        row.innerHTML = `
+            <td>${announcement.date}</td>
+            <td>${announcement.title}</td>
+            <td>${recipientText}</td>
+            <td><span class="priority-${announcement.priority.toLowerCase()}">${announcement.priority}</span></td>
+            <td>${announcement.validUntil || 'No expiry'}</td>
+            <td><span class="status-${status.toLowerCase()}">${status}</span></td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-action btn-view" onclick="viewAnnouncement('${announcement.id}')" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action btn-delete" onclick="deleteAnnouncement('${announcement.id}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function getRecipientText(recipients) {
+    const parts = [];
+    if (recipients.allStudents) {
+        let text = 'All Students';
+        if (recipients.department) {
+            text += ` (${recipients.department}`;
+            if (recipients.semester) {
+                text += `, Semester ${recipients.semester}`;
+            }
+            text += ')';
+        } else if (recipients.semester) {
+            text += ` (Semester ${recipients.semester})`;
+        }
+        parts.push(text);
+    }
+    if (recipients.allInstructors) {
+        parts.push('All Instructors');
+    }
+    return parts.join(', ') || 'None selected';
+}
+
+function viewAnnouncement(announcementId) {
+    const announcement = announcements.find(a => a.id === announcementId);
+    if (announcement) {
+        // Create modal HTML
+        const modalHTML = `
+            <div id="announcementDetailsModal" class="modal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1000;">
+                <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px; position: relative;">
+                    <span class="close" style="position: absolute; right: 10px; top: 5px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; padding: 0 5px;">&times;</span>
+                    <h2 style="margin-bottom: 20px;">${announcement.title}</h2>
+                    <div class="announcement-details">
+                        <div style="margin-bottom: 15px;">
+                            <strong>Date:</strong> ${announcement.date}
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Recipients:</strong> ${getRecipientText(announcement.recipients)}
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Priority:</strong> <span class="priority-${announcement.priority.toLowerCase()}">${announcement.priority}</span>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Valid Until:</strong> ${announcement.validUntil || 'No expiry'}
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Status:</strong> <span class="status-${announcement.status.toLowerCase()}">${announcement.status}</span>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <strong>Message:</strong>
+                            <p style="margin-top: 10px; white-space: pre-wrap;">${announcement.message}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove any existing modal
+        const existingModal = document.getElementById('announcementDetailsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Get modal elements
+        const modal = document.getElementById('announcementDetailsModal');
+        const closeBtn = modal.querySelector('.close');
+
+        // Close modal when clicking X
+        closeBtn.addEventListener('click', function() {
+            modal.remove();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+}
+
+function deleteAnnouncement(announcementId) {
+    if (confirm('Are you sure you want to delete this announcement? This action cannot be undone.')) {
+        announcements = announcements.filter(a => a.id !== announcementId);
+        updateAnnouncementsTable();
+        showNotification('Announcement deleted successfully!', 'success');
+    }
+}
+  
