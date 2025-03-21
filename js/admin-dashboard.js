@@ -224,54 +224,64 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle instructor form submission
-    instructorForm?.addEventListener('submit', (e) => {
+    instructorForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        if (!validateInstructorForm(instructorForm)) {
-            showNotification('Please fill all required fields correctly', 'error');
-            return;
+        console.log('Instructor form submission started');
+
+        try {
+            const formData = new FormData(this);
+            
+            // Log form data for debugging
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            const response = await fetch('/Project/LMS/php/register_instructor.php', {
+                method: 'POST',
+                body: formData // FormData automatically sets the correct Content-Type
+            });
+
+            console.log('Response status:', response.status);
+            const rawResponse = await response.text();
+            console.log('Raw response:', rawResponse);
+
+            let jsonResponse;
+            try {
+                jsonResponse = JSON.parse(rawResponse);
+            } catch (error) {
+                console.error('Error parsing JSON response:', error);
+                console.error('Raw response was:', rawResponse);
+                throw new Error('Invalid JSON response from server');
+            }
+
+            if (jsonResponse.success) {
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: jsonResponse.message
+                });
+
+                // Reset form and image preview
+                this.reset();
+                document.getElementById('instructor-preview').style.display = 'none';
+                document.getElementById('instructor-preview').src = '';
+
+                // Refresh instructor table if it exists
+                if (typeof updateInstructorTable === 'function') {
+                    updateInstructorTable();
+                }
+            } else {
+                throw new Error(jsonResponse.message || 'Registration failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: error.message || 'Failed to register instructor'
+            });
         }
-
-        const formData = new FormData(instructorForm);
-        const instructorId = formData.get('instructorId');
-        
-        // Validate instructor ID format
-        if (!/^INS\d{3}$/.test(instructorId)) {
-            showNotification('Instructor ID must be in format: INS001', 'error');
-            return;
-        }
-
-        const selectedCourses = Array.from(document.getElementById('assignedCourses').selectedOptions).map(option => option.text);
-        
-        const newInstructor = {
-            id: instructorId,
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            cnic: formData.get('cnic'),
-            department: formData.get('department'),
-            qualification: formData.get('qualification'),
-            specialization: formData.get('specialization'),
-            experience: formData.get('experience'),
-            courses: selectedCourses,
-            status: 'Active'
-        };
-
-        const existingIndex = instructors.findIndex(i => i.id === newInstructor.id);
-        if (existingIndex >= 0) {
-            instructors[existingIndex] = newInstructor;
-            showNotification('Instructor information updated successfully!', 'success');
-        } else {
-            instructors.push(newInstructor);
-            showNotification('Instructor registered successfully!', 'success');
-        }
-
-        updateInstructorTable();
-        instructorForm.reset();
-        instructorFormContainer.style.display = 'none';
-        clearValidationStates(instructorForm);
-        updateDashboardStats();
     });
 
     // Instructor search functionality
@@ -1539,4 +1549,46 @@ function updateFeedbackStatus(studentId) {
             showNotification('Feedback status updated successfully!', 'success');
         }
     }
+}
+
+// Add these functions at the beginning of the file
+function previewImage(input, previewId) {
+    const preview = document.getElementById(previewId);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function showInstructorForm() {
+    document.getElementById('instructorFormContainer').style.display = 'block';
+}
+
+function closeInstructorForm() {
+    document.getElementById('instructorFormContainer').style.display = 'none';
+    document.getElementById('instructorForm').reset();
+    document.getElementById('instructorProfilePreview').src = 'images/default-avatar.png';
+}
+
+function showStudentForm() {
+    document.getElementById('studentFormContainer').style.display = 'block';
+}
+
+function closeStudentForm() {
+    document.getElementById('studentFormContainer').style.display = 'none';
+    document.getElementById('studentForm').reset();
+    document.getElementById('studentProfilePreview').src = 'images/default-avatar.png';
+}
+
+function showCourseForm() {
+    document.getElementById('courseFormContainer').style.display = 'block';
+}
+
+function closeCourseForm() {
+    document.getElementById('courseFormContainer').style.display = 'none';
+    document.getElementById('courseForm').reset();
 } 

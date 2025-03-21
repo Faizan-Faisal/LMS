@@ -229,3 +229,18 @@ function showNotification(message, type = 'success') {
         notification.remove();
     }, 3000);
 } 
+
+fetch('fetch_instructors.php')
+.then(response => response.json())
+.then(data => {
+    let table = document.getElementById('instructorFormContainer');
+    data.forEach(instructor => {
+        let row = `<tr>
+            <td>${instructor.id}</td>
+            <td>${instructor.name}</td>
+            <td>${instructor.email}</td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+})
+.catch(error => console.error('Error fetching data:', error));
