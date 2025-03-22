@@ -8,8 +8,8 @@ let courses = [];
 let attendanceRecords = [
     {
         date: "2024-03-20",
-        class: "9",
-        section: "Computer Science",
+        department: "Computer Science",
+        semester: 1,
         totalStudents: 30,
         present: 25,
         absent: 3,
@@ -18,29 +18,172 @@ let attendanceRecords = [
     }
 ];
 
-let examRecords = [
-    {
-        studentId: "STD001",
-        name: "John Doe",
-        class: "9",
-        section: "Computer Science",
-        examType: "Mid Term",
-        subject: "Computer Science",
-        marks: 85,
-        totalMarks: 100,
-        percentage: 85,
-        grade: "A",
-        status: "Pass"
+// Sample exam records data - Replace with empty array for real data
+let examRecords = [];
+
+// Function to add exam record
+function addExamRecord(record) {
+    examRecords.push(record);
+    filterExamRecords(); // Refresh the table
+    updateExamStatistics(examRecords);
+}
+
+// Function to filter exam records
+function filterExamRecords() {
+    const selectedDepartment = document.getElementById('examDepartment')?.value;
+    const selectedSemester = document.getElementById('examSemester')?.value;
+    const selectedType = document.getElementById('examType')?.value;
+    const searchTerm = document.getElementById('examSearch')?.value.toLowerCase();
+
+    let filteredRecords = [...examRecords];
+
+    // Filter by department
+    if (selectedDepartment) {
+        filteredRecords = filteredRecords.filter(record => record.department === selectedDepartment);
     }
-];
+
+    // Filter by semester
+    if (selectedSemester) {
+        filteredRecords = filteredRecords.filter(record => record.semester.toString() === selectedSemester);
+    }
+
+    // Filter by exam type
+    if (selectedType) {
+        filteredRecords = filteredRecords.filter(record => record.examType === selectedType);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+        filteredRecords = filteredRecords.filter(record => 
+            record.studentId.toLowerCase().includes(searchTerm) ||
+            record.name.toLowerCase().includes(searchTerm) ||
+            record.subject.toLowerCase().includes(searchTerm) ||
+            record.department.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    // Sort by percentage (highest first)
+    filteredRecords.sort((a, b) => b.percentage - a.percentage);
+
+    updateExamTable(filteredRecords);
+    updateExamStatistics(filteredRecords);
+}
+
+// Function to update exam table
+function updateExamTable(records = examRecords) {
+    const tbody = document.getElementById('examTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (records.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="11" class="text-center">No exam records found</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    records.forEach(record => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${record.studentId}</td>
+            <td>${record.name}</td>
+            <td>${record.department}</td>
+            <td>${record.semester}${getOrdinalSuffix(record.semester)} Semester</td>
+            <td>${record.examType}</td>
+            <td>${record.subject}</td>
+            <td>${record.marks}</td>
+            <td>${record.totalMarks}</td>
+            <td>${record.percentage}%</td>
+            <td>${record.grade}</td>
+            <td><span class="status-${record.status.toLowerCase()}">${record.status}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Function to update exam statistics
+function updateExamStatistics(records) {
+    const totalStudents = records.length;
+    const passedStudents = records.filter(record => record.status === 'Pass').length;
+    const failedStudents = records.filter(record => record.status === 'Fail').length;
+    const absentStudents = records.filter(record => record.status === 'Absent').length;
+
+    // Update statistics cards
+    document.getElementById('totalStudents').textContent = totalStudents;
+    document.getElementById('passedStudents').textContent = passedStudents;
+    document.getElementById('failedStudents').textContent = failedStudents;
+    document.getElementById('absentStudents').textContent = absentStudents;
+
+    // Update pass percentage
+    const passPercentage = totalStudents > 0 ? ((passedStudents / totalStudents) * 100).toFixed(2) : 0;
+    document.getElementById('passPercentage').textContent = `${passPercentage}%`;
+}
+
+// Function to calculate grade based on percentage
+function calculateGrade(percentage) {
+    if (percentage >= 90) return 'A+';
+    if (percentage >= 85) return 'A';
+    if (percentage >= 80) return 'A-';
+    if (percentage >= 75) return 'B+';
+    if (percentage >= 70) return 'B';
+    if (percentage >= 65) return 'B-';
+    if (percentage >= 60) return 'C+';
+    if (percentage >= 55) return 'C';
+    if (percentage >= 50) return 'C-';
+    return 'F';
+}
+
+// Function to add a new exam record
+function addNewExamRecord(studentId, name, department, semester, examType, subject, marks, totalMarks) {
+    const percentage = ((marks / totalMarks) * 100).toFixed(2);
+    const grade = calculateGrade(percentage);
+    const status = percentage >= 50 ? 'Pass' : 'Fail';
+
+    const newRecord = {
+        studentId,
+        name,
+        department,
+        semester: parseInt(semester),
+        examType,
+        subject,
+        marks: parseInt(marks),
+        totalMarks: parseInt(totalMarks),
+        percentage: parseFloat(percentage),
+        grade,
+        status
+    };
+
+    addExamRecord(newRecord);
+}
+
+// Initialize exam records with some sample data for testing
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for exam filters
+    document.getElementById('examDepartment')?.addEventListener('change', filterExamRecords);
+    document.getElementById('examSemester')?.addEventListener('change', filterExamRecords);
+    document.getElementById('examType')?.addEventListener('change', filterExamRecords);
+    document.getElementById('examSearch')?.addEventListener('input', filterExamRecords);
+    
+    // Add event listener for generate report button
+    document.getElementById('generateExamReport')?.addEventListener('click', () => {
+        filterExamRecords();
+        showNotification('Exam report generated successfully!', 'success');
+    });
+
+    // Initialize the exam records table and statistics
+    filterExamRecords();
+});
 
 let studentFeedback = [
     {
         date: "2024-03-19",
         studentId: "STD001",
         name: "John Doe",
-        class: "9",
-        section: "Computer Science",
+        department: "Computer Science",
+        semester: 1,
         category: "Academic",
         issue: "Difficulty understanding programming concepts",
         solution: "Additional practice sessions scheduled",
@@ -157,7 +300,6 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         if (!validateStudentForm(studentForm)) {
-            showNotification('Please fill all required fields correctly', 'error');
             return;
         }
 
@@ -170,16 +312,11 @@ document.addEventListener('DOMContentLoaded', function() {
             phone: formData.get('phone'),
             cnic: formData.get('cnic'),
             program: formData.get('program'),
+            semester: formData.get('semester'),
             enrollmentYear: formData.get('enrollmentYear'),
             address: formData.get('address'),
             status: formData.get('studentStatus') || 'Active'
         };
-
-        // Validate student ID format
-        if (!/^STD\d{3}$/.test(newStudent.id)) {
-            showNotification('Student ID must be in format: STD001', 'error');
-            return;
-        }
 
         const existingIndex = students.findIndex(s => s.id === newStudent.id);
         if (existingIndex >= 0) {
@@ -242,21 +379,12 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         if (!validateInstructorForm(instructorForm)) {
-            showNotification('Please fill all required fields correctly', 'error');
             return;
         }
 
         const formData = new FormData(instructorForm);
-        const instructorId = formData.get('instructorId');
-        
-        // Validate instructor ID format
-        if (!/^INS\d{3}$/.test(instructorId)) {
-            showNotification('Instructor ID must be in format: INS001', 'error');
-            return;
-        }
-        
         const newInstructor = {
-            id: instructorId,
+            id: formData.get('instructorId'),
             firstName: formData.get('firstName'),
             lastName: formData.get('lastName'),
             email: formData.get('email'),
@@ -421,110 +549,134 @@ document.addEventListener('DOMContentLoaded', function() {
     updateDashboardStats();
 
     // Reports Section Functions
-    const attendanceClass = document.getElementById('attendanceClass');
-    const attendanceSection = document.getElementById('attendanceSection');
+    function initializeReportSection() {
+        // Get all the report section elements
+        const attendanceDepartment = document.getElementById('attendanceDepartment');
+        const attendanceSemester = document.getElementById('attendanceSemester');
     const attendanceMonth = document.getElementById('attendanceMonth');
     const generateAttendanceReport = document.getElementById('generateAttendanceReport');
     const attendanceSearch = document.getElementById('attendanceSearch');
 
-    const examClass = document.getElementById('examClass');
-    const examSection = document.getElementById('examSection');
+        const examDepartment = document.getElementById('examDepartment');
+        const examSemester = document.getElementById('examSemester');
     const examType = document.getElementById('examType');
     const generateExamReport = document.getElementById('generateExamReport');
     const examSearch = document.getElementById('examSearch');
 
-    const feedbackClass = document.getElementById('feedbackClass');
-    const feedbackSection = document.getElementById('feedbackSection');
+        const feedbackDepartment = document.getElementById('feedbackDepartment');
+        const feedbackSemester = document.getElementById('feedbackSemester');
     const feedbackStatus = document.getElementById('feedbackStatus');
     const generateFeedbackReport = document.getElementById('generateFeedbackReport');
     const feedbackSearch = document.getElementById('feedbackSearch');
 
-    // Attendance Report Functions
-    attendanceClass?.addEventListener('change', () => {
-        updateAttendanceSectionOptions();
-        filterAttendanceRecords();
-    });
+        // Initialize dropdowns
+        populateDepartmentDropdowns();
+        populateSemesterDropdowns();
 
-    attendanceSection?.addEventListener('change', () => {
-        filterAttendanceRecords();
-    });
-
-    attendanceMonth?.addEventListener('change', () => {
-        filterAttendanceRecords();
-    });
-
+        // Add event listeners
+        // Attendance Report
+        attendanceDepartment?.addEventListener('change', filterAttendanceRecords);
+        attendanceSemester?.addEventListener('change', filterAttendanceRecords);
+        attendanceMonth?.addEventListener('change', filterAttendanceRecords);
     generateAttendanceReport?.addEventListener('click', () => {
         filterAttendanceRecords();
         showNotification('Attendance report generated successfully!', 'success');
     });
+        attendanceSearch?.addEventListener('input', filterAttendanceRecords);
 
-    attendanceSearch?.addEventListener('input', () => {
+        // Exam Report
+        examDepartment?.addEventListener('change', filterExamRecords);
+        examSemester?.addEventListener('change', filterExamRecords);
+        examType?.addEventListener('change', filterExamRecords);
+        generateExamReport?.addEventListener('click', () => {
+        filterExamRecords();
+            showNotification('Exam report generated successfully!', 'success');
+        });
+        examSearch?.addEventListener('input', filterExamRecords);
+
+        // Feedback Report
+        feedbackDepartment?.addEventListener('change', filterFeedbackRecords);
+        feedbackSemester?.addEventListener('change', filterFeedbackRecords);
+        feedbackStatus?.addEventListener('change', filterFeedbackRecords);
+        generateFeedbackReport?.addEventListener('click', () => {
+            filterFeedbackRecords();
+            showNotification('Feedback report generated successfully!', 'success');
+        });
+        feedbackSearch?.addEventListener('input', filterFeedbackRecords);
+
+        // Initial table population
         filterAttendanceRecords();
-    });
-
-    // Exam Report Functions
-    examClass?.addEventListener('change', () => {
-        updateExamSectionOptions();
         filterExamRecords();
-    });
-
-    examSection?.addEventListener('change', () => {
-        filterExamRecords();
-    });
-
-    examType?.addEventListener('change', () => {
-        filterExamRecords();
-    });
-
-    generateExamReport?.addEventListener('click', () => {
-        filterExamRecords();
-        showNotification('Exam report generated successfully!', 'success');
-    });
-
-    examSearch?.addEventListener('input', () => {
-        filterExamRecords();
-    });
-
-    // Feedback Report Functions
-    feedbackClass?.addEventListener('change', () => {
-        updateFeedbackSectionOptions();
         filterFeedbackRecords();
-    });
+    }
 
-    feedbackSection?.addEventListener('change', () => {
-        filterFeedbackRecords();
-    });
+    // Add function to populate department dropdowns
+    function populateDepartmentDropdowns() {
+        const departmentDropdowns = [
+            document.getElementById('attendanceDepartment'),
+            document.getElementById('examDepartment'),
+            document.getElementById('feedbackDepartment')
+        ];
 
-    feedbackStatus?.addEventListener('change', () => {
-        filterFeedbackRecords();
-    });
+        departmentDropdowns.forEach(dropdown => {
+            if (dropdown) {
+                dropdown.innerHTML = '<option value="">Select Department</option>';
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    dropdown.appendChild(option);
+                });
+            }
+        });
+    }
 
-    generateFeedbackReport?.addEventListener('click', () => {
-        filterFeedbackRecords();
-        showNotification('Feedback report generated successfully!', 'success');
-    });
+    // Add function to populate semester dropdowns
+    function populateSemesterDropdowns() {
+        const semesterDropdowns = [
+            document.getElementById('attendanceSemester'),
+            document.getElementById('examSemester'),
+            document.getElementById('feedbackSemester')
+        ];
 
-    feedbackSearch?.addEventListener('input', () => {
-        filterFeedbackRecords();
+        semesterDropdowns.forEach(dropdown => {
+            if (dropdown) {
+                dropdown.innerHTML = '<option value="">Select Semester</option>';
+                for (let i = 1; i <= 8; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString();
+                    option.textContent = `${i}${getOrdinalSuffix(i)} Semester`;
+                    dropdown.appendChild(option);
+                }
+            }
+        });
+    }
+
+    // Update the DOMContentLoaded event listener
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... existing code ...
+
+        // Initialize report section
+        initializeReportSection();
     });
 
     // Filter Functions
     function filterAttendanceRecords() {
-        const selectedClass = attendanceClass?.value;
-        const selectedSection = attendanceSection?.value;
-        const selectedMonth = attendanceMonth?.value;
-        const searchTerm = attendanceSearch?.value.toLowerCase();
+        const selectedDepartment = document.getElementById('attendanceDepartment')?.value;
+        const selectedSemester = document.getElementById('attendanceSemester')?.value;
+        const selectedMonth = document.getElementById('attendanceMonth')?.value;
+        const searchTerm = document.getElementById('attendanceSearch')?.value.toLowerCase();
 
         let filteredRecords = [...attendanceRecords];
 
-        // Filter by class
-        if (selectedClass) {
-            filteredRecords = filteredRecords.filter(record => record.class === selectedClass);
+        // Filter by department
+        if (selectedDepartment) {
+            filteredRecords = filteredRecords.filter(record => record.department === selectedDepartment);
         }
 
-        // Filter by section
-        if (selectedSection) {
-            filteredRecords = filteredRecords.filter(record => record.section === selectedSection);
+        // Filter by semester
+        if (selectedSemester) {
+            filteredRecords = filteredRecords.filter(record => record.semester.toString() === selectedSemester);
         }
 
         // Filter by month
@@ -535,8 +687,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Filter by search term
         if (searchTerm) {
             filteredRecords = filteredRecords.filter(record => 
-                record.class.toLowerCase().includes(searchTerm) ||
-                record.section.toLowerCase().includes(searchTerm) ||
+                record.department.toLowerCase().includes(searchTerm) ||
+                record.semester.toString().includes(searchTerm) ||
                 record.date.includes(searchTerm)
             );
         }
@@ -548,21 +700,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function filterExamRecords() {
-        const selectedClass = examClass?.value;
-        const selectedSection = examSection?.value;
-        const selectedType = examType?.value;
-        const searchTerm = examSearch?.value.toLowerCase();
+        const selectedDepartment = document.getElementById('examDepartment')?.value;
+        const selectedSemester = document.getElementById('examSemester')?.value;
+        const selectedType = document.getElementById('examType')?.value;
+        const searchTerm = document.getElementById('examSearch')?.value.toLowerCase();
 
         let filteredRecords = [...examRecords];
 
-        // Filter by class
-        if (selectedClass) {
-            filteredRecords = filteredRecords.filter(record => record.class === selectedClass);
+        // Filter by department
+        if (selectedDepartment) {
+            filteredRecords = filteredRecords.filter(record => record.department === selectedDepartment);
         }
 
-        // Filter by section
-        if (selectedSection) {
-            filteredRecords = filteredRecords.filter(record => record.section === selectedSection);
+        // Filter by semester
+        if (selectedSemester) {
+            filteredRecords = filteredRecords.filter(record => record.semester.toString() === selectedSemester);
         }
 
         // Filter by exam type
@@ -573,17 +725,54 @@ document.addEventListener('DOMContentLoaded', function() {
         // Filter by search term
         if (searchTerm) {
             filteredRecords = filteredRecords.filter(record => 
-                record.name.toLowerCase().includes(searchTerm) ||
                 record.studentId.toLowerCase().includes(searchTerm) ||
-                record.subject.toLowerCase().includes(searchTerm)
+                record.name.toLowerCase().includes(searchTerm) ||
+                record.subject.toLowerCase().includes(searchTerm) ||
+                record.department.toLowerCase().includes(searchTerm)
             );
         }
 
-        // Sort by percentage (highest first)
-        filteredRecords.sort((a, b) => b.percentage - a.percentage);
-
         updateExamTable(filteredRecords);
         updateExamStatistics(filteredRecords);
+    }
+
+    function filterFeedbackRecords() {
+        const selectedDepartment = document.getElementById('feedbackDepartment')?.value;
+        const selectedSemester = document.getElementById('feedbackSemester')?.value;
+        const selectedStatus = document.getElementById('feedbackStatus')?.value;
+        const searchTerm = document.getElementById('feedbackSearch')?.value.toLowerCase();
+
+        let filteredRecords = [...studentFeedback];
+
+        // Filter by department
+        if (selectedDepartment) {
+            filteredRecords = filteredRecords.filter(record => record.department === selectedDepartment);
+        }
+
+        // Filter by semester
+        if (selectedSemester) {
+            filteredRecords = filteredRecords.filter(record => record.semester.toString() === selectedSemester);
+        }
+
+        // Filter by status
+        if (selectedStatus) {
+            filteredRecords = filteredRecords.filter(record => record.status === selectedStatus);
+        }
+
+        // Filter by search term
+        if (searchTerm) {
+            filteredRecords = filteredRecords.filter(record => 
+                record.issue.toLowerCase().includes(searchTerm) ||
+                record.solution.toLowerCase().includes(searchTerm) ||
+                record.category.toLowerCase().includes(searchTerm) ||
+                record.department.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        // Sort by date (newest first)
+        filteredRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        updateFeedbackTable(filteredRecords);
     }
 
     function updateExamStatistics(records) {
@@ -598,92 +787,91 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('absentStudents').textContent = absentStudents;
     }
 
-    function showStudentDetails(status) {
+    function showStudentDetails(type) {
         const modal = document.getElementById('studentDetailsModal');
         const modalTitle = document.getElementById('modalTitle');
         const tbody = document.getElementById('studentDetailsBody');
-        const filteredRecords = examRecords.filter(record => record.status === status.charAt(0).toUpperCase() + status.slice(1));
-
-        // Set modal title based on status
-        modalTitle.textContent = `${status.charAt(0).toUpperCase() + status.slice(1)} Students Details`;
-
-        // Clear existing content
+        
+        let filteredStudents = [];
+        switch(type) {
+            case 'pass':
+                modalTitle.textContent = 'Passed Students';
+                filteredStudents = examRecords.filter(record => record.status === 'Pass');
+                break;
+            case 'fail':
+                modalTitle.textContent = 'Failed Students';
+                filteredStudents = examRecords.filter(record => record.status === 'Fail');
+                break;
+            case 'absent':
+                modalTitle.textContent = 'Absent Students';
+                filteredStudents = examRecords.filter(record => record.status === 'Absent');
+                break;
+        }
+        
         tbody.innerHTML = '';
-
-        if (filteredRecords.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center">No ${status} students found</td>
-                </tr>
-            `;
-        } else {
-            filteredRecords.forEach(record => {
+        filteredStudents.forEach(student => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${record.studentId}</td>
-                    <td>${record.name}</td>
-                    <td>${record.marks}</td>
-                    <td>${record.totalMarks}</td>
-                    <td>${record.percentage}%</td>
-                    <td>${record.grade}</td>
+                <td>${student.studentId}</td>
+                <td>${student.name}</td>
+                <td>${student.marks}</td>
+                <td>${student.totalMarks}</td>
+                <td>${student.percentage}%</td>
+                <td>${student.grade}</td>
                 `;
                 tbody.appendChild(row);
             });
-        }
 
-        // Show modal
         modal.style.display = 'block';
-
-        // Add close button functionality
-        const closeBtn = modal.querySelector('.close');
-        closeBtn.onclick = function() {
-            modal.style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
     }
 
-    function filterFeedbackRecords() {
-        const selectedClass = feedbackClass?.value;
-        const selectedSection = feedbackSection?.value;
-        const selectedStatus = feedbackStatus?.value;
-        const searchTerm = feedbackSearch?.value.toLowerCase();
-
-        let filteredRecords = [...studentFeedback];
-
-        // Filter by class
-        if (selectedClass) {
-            filteredRecords = filteredRecords.filter(record => record.class === selectedClass);
+    function updateFeedbackTable(records = studentFeedback) {
+        const tbody = document.getElementById('feedbackTableBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (records.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center">No feedback records found</td>
+                </tr>
+            `;
+            return;
         }
+        
+        records.forEach(record => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${record.date}</td>
+                <td>${record.studentId}</td>
+                <td>${record.name}</td>
+                <td>${record.department}</td>
+                <td>${record.semester}${getOrdinalSuffix(record.semester)} Semester</td>
+                <td>${record.category}</td>
+                <td>${record.issue}</td>
+                <td>${record.solution}</td>
+                <td><span class="status-${record.status.toLowerCase()}">${record.status}</span></td>
+                <td>
+                    <button class="btn-action btn-edit" onclick="updateFeedbackStatus('${record.studentId}')" title="Update Status">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
 
-        // Filter by section
-        if (selectedSection) {
-            filteredRecords = filteredRecords.filter(record => record.section === selectedSection);
+    function updateFeedbackStatus(studentId) {
+        const feedback = studentFeedback.find(f => f.studentId === studentId);
+        if (feedback) {
+            const newStatus = prompt('Update status (pending/resolved/in-progress):', feedback.status);
+            if (newStatus && ['pending', 'resolved', 'in-progress'].includes(newStatus.toLowerCase())) {
+                feedback.status = newStatus;
+                updateFeedbackTable();
+                showNotification('Feedback status updated successfully!', 'success');
+            }
         }
-
-        // Filter by status
-        if (selectedStatus) {
-            filteredRecords = filteredRecords.filter(record => record.status === selectedStatus);
-        }
-
-        // Filter by search term
-        if (searchTerm) {
-            filteredRecords = filteredRecords.filter(record => 
-                record.issue.toLowerCase().includes(searchTerm) ||
-                record.solution.toLowerCase().includes(searchTerm) ||
-                record.category.toLowerCase().includes(searchTerm)
-            );
-        }
-
-        // Sort by date (newest first)
-        filteredRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        updateFeedbackTable(filteredRecords);
     }
 
     // Initial table population
@@ -827,6 +1015,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Find the course and instructor
         const course = courses.find(c => c.id === courseId);
         const instructor = instructors.find(i => i.id === instructorId);
+
 
         if (!course || !instructor) {
             showNotification('Invalid course or instructor selection', 'error');
@@ -1058,9 +1247,32 @@ document.addEventListener('DOMContentLoaded', function() {
         announcementForm.reset();
     });
 
-    // Show/Hide student filters based on checkbox
+    // Show/Hide student filters based on checkbox and update department dropdown
     allStudentsCheckbox?.addEventListener('change', (e) => {
         studentFilters.style.display = e.target.checked ? 'block' : 'none';
+        
+        // Update department dropdown when student checkbox changes
+        if (e.target.checked) {
+            const departmentFilter = document.getElementById('departmentFilter');
+            if (departmentFilter) {
+                // Clear existing options
+                departmentFilter.innerHTML = '<option value="">Select Department</option>';
+                
+                // Add "All Departments" option
+                const allDeptOption = document.createElement('option');
+                allDeptOption.value = "all";
+                allDeptOption.textContent = "All Departments";
+                departmentFilter.appendChild(allDeptOption);
+                
+                // Add individual departments
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    departmentFilter.appendChild(option);
+                });
+            }
+        }
     });
 
     // Handle announcement form submission
@@ -1084,6 +1296,22 @@ document.addEventListener('DOMContentLoaded', function() {
             status: 'Active'
         };
 
+        // Validate form
+        if (!newAnnouncement.title.trim()) {
+            showNotification('Please enter an announcement title', 'error');
+            return;
+        }
+
+        if (!newAnnouncement.message.trim()) {
+            showNotification('Please enter an announcement message', 'error');
+            return;
+        }
+
+        if (!newAnnouncement.recipients.allStudents && !newAnnouncement.recipients.allInstructors) {
+            showNotification('Please select at least one recipient group', 'error');
+            return;
+        }
+
         announcements.unshift(newAnnouncement);
         updateAnnouncementsTable();
         showNotification('Announcement sent successfully!', 'success');
@@ -1095,6 +1323,119 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial announcements table population
     updateAnnouncementsTable();
+
+    // Function to populate department dropdowns in announcement form
+    function populateAnnouncementDepartments() {
+        const studentDeptFilter = document.getElementById('departmentFilter');
+        const instructorDeptFilter = document.getElementById('instructorDepartmentFilter');
+        
+        if (studentDeptFilter && instructorDeptFilter) {
+            // Clear existing options
+            studentDeptFilter.innerHTML = '<option value="">All Departments</option>';
+            instructorDeptFilter.innerHTML = '<option value="">All Departments</option>';
+            
+            // Add department options from the global departments array
+            departments.sort().forEach(dept => {
+                // Add to student department filter
+                const studentOption = document.createElement('option');
+                studentOption.value = dept;
+                studentOption.textContent = dept;
+                studentDeptFilter.appendChild(studentOption);
+                
+                // Add to instructor department filter
+                const instructorOption = document.createElement('option');
+                instructorOption.value = dept;
+                instructorOption.textContent = dept;
+                instructorDeptFilter.appendChild(instructorOption);
+            });
+        }
+    }
+
+    // Add event listeners for announcement form checkboxes
+    document.getElementById('allStudents')?.addEventListener('change', function() {
+        const studentFilters = document.getElementById('studentFilters');
+        studentFilters.style.display = this.checked ? 'flex' : 'none';
+        
+        // Uncheck all instructors if students are selected
+        if (this.checked) {
+            document.getElementById('allInstructors').checked = false;
+            document.getElementById('instructorFilters').style.display = 'none';
+        }
+        
+        // Populate departments when student checkbox is checked
+        if (this.checked) {
+            populateAnnouncementDepartments();
+        }
+    });
+
+    document.getElementById('allInstructors')?.addEventListener('change', function() {
+        const instructorFilters = document.getElementById('instructorFilters');
+        instructorFilters.style.display = this.checked ? 'flex' : 'none';
+        
+        // Uncheck all students if instructors are selected
+        if (this.checked) {
+            document.getElementById('allStudents').checked = false;
+            document.getElementById('studentFilters').style.display = 'none';
+        }
+        
+        // Populate departments when instructor checkbox is checked
+        if (this.checked) {
+            populateAnnouncementDepartments();
+        }
+    });
+
+    // Function to get recipient text for announcements
+    function getRecipientText(form) {
+        const allStudents = form.querySelector('#allStudents').checked;
+        const allInstructors = form.querySelector('#allInstructors').checked;
+        const studentDept = form.querySelector('#departmentFilter').value;
+        const instructorDept = form.querySelector('#instructorDepartmentFilter').value;
+        const semester = form.querySelector('#semesterFilter').value;
+        
+        let recipients = [];
+        
+        if (allStudents) {
+            if (studentDept && semester) {
+                recipients.push(`Students (${studentDept} - ${semester}${getOrdinalSuffix(semester)} Semester)`);
+            } else if (studentDept) {
+                recipients.push(`Students (${studentDept})`);
+            } else if (semester) {
+                recipients.push(`Students (${semester}${getOrdinalSuffix(semester)} Semester)`);
+            } else {
+                recipients.push('All Students');
+            }
+        }
+        
+        if (allInstructors) {
+            if (instructorDept) {
+                recipients.push(`Instructors (${instructorDept})`);
+            } else {
+                recipients.push('All Instructors');
+            }
+        }
+        
+        return recipients.join(', ');
+    }
+
+    // Initialize announcement form
+    document.addEventListener('DOMContentLoaded', function() {
+        // Populate department dropdowns when the announcement form is shown
+        document.getElementById('newAnnouncementBtn')?.addEventListener('click', function() {
+            document.getElementById('announcementFormContainer').style.display = 'block';
+            populateAnnouncementDepartments();
+        });
+
+        // Add event listener for department changes in settings
+        const departmentForm = document.getElementById('departmentForm');
+        if (departmentForm) {
+            departmentForm.addEventListener('submit', function(e) {
+                // After adding a new department, update announcement dropdowns
+                setTimeout(() => {
+                    populateAnnouncementDepartments();
+                }, 0);
+            });
+        }
+    });
 });
 
 // Helper Functions
@@ -1107,7 +1448,7 @@ function updateStudentTable(studentList = students) {
     if (studentList.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center">No students found</td>
+                <td colspan="7" class="text-center">No students found</td>
             </tr>
         `;
         return;
@@ -1120,6 +1461,7 @@ function updateStudentTable(studentList = students) {
             <td>${student.firstName} ${student.lastName}</td>
             <td>${student.email}</td>
             <td>${student.program}</td>
+            <td>${student.semester}${getOrdinalSuffix(student.semester)} Semester</td>
             <td><span class="status-${student.status.toLowerCase()}">${student.status}</span></td>
             <td>
                 <button class="btn-action btn-view" onclick="viewStudent('${student.id}')" title="View Details">
@@ -1135,6 +1477,66 @@ function updateStudentTable(studentList = students) {
         `;
         tbody.appendChild(row);
     });
+}
+
+// Add some CSS styles to ensure proper alignment
+document.addEventListener('DOMContentLoaded', function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .student-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .student-table th,
+        .student-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .student-table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+        .student-table td {
+            vertical-align: middle;
+        }
+        .btn-action {
+            padding: 6px;
+            margin: 0 3px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+        }
+        .btn-view { color: #2196F3; }
+        .btn-edit { color: #4CAF50; }
+        .btn-delete { color: #F44336; }
+        .status-active {
+            background-color: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .status-inactive {
+            background-color: #F44336;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Add helper function for ordinal suffixes
+function getOrdinalSuffix(n) {
+    const j = n % 10;
+    const k = n % 100;
+    if (j == 1 && k != 11) return "st";
+    if (j == 2 && k != 12) return "nd";
+    if (j == 3 && k != 13) return "rd";
+    return "th";
 }
 
 function updateInstructorTable(instructorList = instructors) {
@@ -1260,7 +1662,7 @@ function viewInstructor(instructorId) {
 function viewStudent(studentId) {
     const student = students.find(s => s.id === studentId);
     if (student) {
-        // Create modal HTML with fixed styling for close button
+        // Create modal HTML
         const modalHTML = `
             <div id="studentDetailsModal" class="modal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1000;">
                 <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px; position: relative;">
@@ -1290,6 +1692,9 @@ function viewStudent(studentId) {
                         <div class="student-info">
                             <div style="margin-bottom: 15px;">
                                 <strong>Program:</strong> ${student.program}
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>Semester:</strong> ${student.semester}${getOrdinalSuffix(student.semester)} Semester
                             </div>
                             <div style="margin-bottom: 15px;">
                                 <strong>Enrollment Year:</strong> ${student.enrollmentYear}
@@ -1349,6 +1754,7 @@ function editStudent(studentId) {
         form.phone.value = student.phone;
         form.cnic.value = student.cnic;
         form.program.value = student.program;
+        form.semester.value = student.semester;
         form.enrollmentYear.value = student.enrollmentYear;
         form.address.value = student.address;
 
@@ -1436,98 +1842,28 @@ function deleteInstructor(instructorId) {
 
 function validateStudentForm(form) {
     let isValid = true;
+    clearValidationStates(form);
     
-    // Required fields
-    const requiredFields = [
-        'studentId', 
-        'firstName', 
-        'lastName', 
-        'email', 
-        'phone', 
-        'cnic', 
-        'program',
-        'enrollmentYear',
-        'address'
-    ];
-    
-    requiredFields.forEach(field => {
-        const input = form[field];
-        if (!input || !input.value.trim()) {
-            markInvalid(input, 'This field is required');
-            isValid = false;
-        } else {
-            markValid(input);
-        }
-    });
-
-    // Email validation
-    const emailInput = form['email'];
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailInput && emailInput.value && !emailPattern.test(emailInput.value)) {
-        markInvalid(emailInput, 'Please enter a valid email address');
-        isValid = false;
-    }
-
-    // Phone validation
-    const phoneInput = form['phone'];
-    const phonePattern = /^3\d{2}-\d{4}-\d{3}$/;
-    if (phoneInput && phoneInput.value && !phonePattern.test(phoneInput.value)) {
-        markInvalid(phoneInput, 'Please enter phone in format: 3XX-XXXX-XXX');
-        isValid = false;
-    }
-
-    // CNIC validation
-    const cnicInput = form['cnic'];
-    const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
-    if (cnicInput && cnicInput.value && !cnicPattern.test(cnicInput.value)) {
-        markInvalid(cnicInput, 'Please enter CNIC in format: 12345-1234567-1');
-        isValid = false;
-    }
-
-    // Student ID validation
-    const studentIdInput = form['studentId'];
-    const studentIdPattern = /^STD\d{3}$/;
-    if (studentIdInput && studentIdInput.value && !studentIdPattern.test(studentIdInput.value)) {
-        markInvalid(studentIdInput, 'Student ID must be in format: STD001');
-        isValid = false;
-    }
-
-    // Enrollment Year validation
-    const enrollmentYearInput = form['enrollmentYear'];
-    if (enrollmentYearInput && enrollmentYearInput.value) {
-        const year = parseInt(enrollmentYearInput.value);
-        const currentYear = new Date().getFullYear();
-        if (year < 2000 || year > currentYear) {
-            markInvalid(enrollmentYearInput, `Year must be between 2000 and ${currentYear}`);
-            isValid = false;
-        }
-    }
-
-    return isValid;
-}
-
-function validateInstructorForm(form) {
-    let isValid = true;
-    
-    // Required fields
-    const requiredFields = ['instructorId', 'firstName', 'lastName', 'email', 'phone', 'cnic'];
-    
+    // Required fields validation
+    const requiredFields = ['studentId', 'firstName', 'lastName', 'email', 'phone', 'cnic', 'program', 'enrollmentYear', 'address'];
     requiredFields.forEach(field => {
         const input = form[field];
         if (!input.value.trim()) {
             markInvalid(input, 'This field is required');
             isValid = false;
-        } else {
-            markValid(input);
         }
     });
 
-    // Instructor ID validation
-    const instructorIdInput = form['instructorId'];
-    const instructorIdPattern = /^INS\d{3}$/;
-    if (instructorIdInput.value && !instructorIdPattern.test(instructorIdInput.value)) {
-        markInvalid(instructorIdInput, 'Instructor ID must be in format: INS001');
-        isValid = false;
+    // Student ID validation
+    const studentIdInput = form['studentId'];
+    if (studentIdInput.value) {
+        const studentIdPattern = /^STD\d+$/;
+        if (!studentIdPattern.test(studentIdInput.value)) {
+            markInvalid(studentIdInput, 'Student ID must start with STD followed by numbers');
+            isValid = false;
+        } else {
+            markValid(studentIdInput);
+        }
     }
 
     // Email validation
@@ -1550,7 +1886,60 @@ function validateInstructorForm(form) {
     const cnicInput = form['cnic'];
     const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
     if (cnicInput.value && !cnicPattern.test(cnicInput.value)) {
-        markInvalid(cnicInput, 'Please enter CNIC in format: 12345-1234567-1');
+        markInvalid(cnicInput, 'Please enter CNIC in format: XXXXX-XXXXXXX-X');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+function validateInstructorForm(form) {
+    let isValid = true;
+    clearValidationStates(form);
+    
+    // Required fields validation
+    const requiredFields = ['instructorId', 'firstName', 'lastName', 'email', 'phone', 'cnic'];
+    requiredFields.forEach(field => {
+        const input = form[field];
+        if (!input.value.trim()) {
+            markInvalid(input, 'This field is required');
+            isValid = false;
+        }
+    });
+
+    // Instructor ID validation
+    const instructorIdInput = form['instructorId'];
+    if (instructorIdInput.value) {
+        const instructorIdPattern = /^INS\d+$/;
+        if (!instructorIdPattern.test(instructorIdInput.value)) {
+            markInvalid(instructorIdInput, 'Instructor ID must start with INS followed by numbers');
+        isValid = false;
+        } else {
+            markValid(instructorIdInput);
+        }
+    }
+
+    // Email validation
+    const emailInput = form['email'];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailInput.value && !emailPattern.test(emailInput.value)) {
+        markInvalid(emailInput, 'Please enter a valid email address');
+        isValid = false;
+    }
+
+    // Phone validation
+    const phoneInput = form['phone'];
+    const phonePattern = /^3\d{2}-\d{4}-\d{3}$/;
+    if (phoneInput.value && !phonePattern.test(phoneInput.value)) {
+        markInvalid(phoneInput, 'Please enter phone in format: 3XX-XXXX-XXX');
+        isValid = false;
+    }
+
+    // CNIC validation
+    const cnicInput = form['cnic'];
+    const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
+    if (cnicInput.value && !cnicPattern.test(cnicInput.value)) {
+        markInvalid(cnicInput, 'Please enter CNIC in format: XXXXX-XXXXXXX-X');
         isValid = false;
     }
 
@@ -1561,31 +1950,50 @@ function markInvalid(input, message) {
     input.classList.add('is-invalid');
     input.classList.remove('is-valid');
     
-    // Create or update error message
-    let errorDiv = input.parentElement.querySelector('.error-message');
-    if (!errorDiv) {
-        errorDiv = document.createElement('div');
+    // Remove any existing error messages
+    const existingErrors = input.parentElement.querySelectorAll('.error-message');
+    existingErrors.forEach(error => error.remove());
+    
+    // Create new error message
+    const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
-        input.parentElement.appendChild(errorDiv);
-    }
     errorDiv.textContent = message;
+    errorDiv.style.color = '#dc3545';
+    errorDiv.style.fontSize = '0.875rem';
+    errorDiv.style.marginTop = '4px';
+    errorDiv.style.display = 'block';
+    
+    // Add error message after the input
+        input.parentElement.appendChild(errorDiv);
+    
+    // Style the input
+    input.style.borderColor = '#dc3545';
+    input.style.backgroundColor = '#fff';
 }
 
 function markValid(input) {
     input.classList.remove('is-invalid');
     input.classList.add('is-valid');
     
-    // Remove error message if exists
+    // Remove any existing error message
     const errorDiv = input.parentElement.querySelector('.error-message');
     if (errorDiv) {
         errorDiv.remove();
     }
+    
+    // Reset input styling
+    input.style.borderColor = '#28a745';
+    input.style.backgroundColor = '#fff';
 }
 
 function clearValidationStates(form) {
     const inputs = form.querySelectorAll('input, select, textarea');
     inputs.forEach(input => {
         input.classList.remove('is-invalid', 'is-valid');
+        input.style.borderColor = '';
+        input.style.backgroundColor = '';
+        
+        // Remove any existing error messages
         const errorDiv = input.parentElement.querySelector('.error-message');
         if (errorDiv) {
             errorDiv.remove();
@@ -1594,32 +2002,70 @@ function clearValidationStates(form) {
 }
 
 function showNotification(message, type = 'success') {
+    // Remove any existing notifications first
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     
-    // Style based on type
-    const colors = {
-        success: '#28a745',
-        error: '#dc3545',
-        info: '#17a2b8',
-        warning: '#ffc107'
-    };
-    
-    notification.style.backgroundColor = colors[type];
-    notification.style.color = type === 'warning' ? '#000' : '#fff';
+    // Add styles directly to the element
     notification.style.position = 'fixed';
     notification.style.top = '20px';
     notification.style.right = '20px';
-    notification.style.padding = '10px 20px';
+    notification.style.padding = '12px 24px';
     notification.style.borderRadius = '4px';
-    notification.style.zIndex = '1000';
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '250px';
+    notification.style.textAlign = 'center';
+    notification.style.fontWeight = '500';
+    notification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    
+    // Set colors based on type
+    switch(type) {
+        case 'error':
+            notification.style.backgroundColor = '#dc3545';
+            notification.style.color = '#fff';
+            break;
+        case 'success':
+            notification.style.backgroundColor = '#28a745';
+            notification.style.color = '#fff';
+            break;
+        case 'info':
+            notification.style.backgroundColor = '#17a2b8';
+            notification.style.color = '#fff';
+            break;
+        case 'warning':
+            notification.style.backgroundColor = '#ffc107';
+            notification.style.color = '#000';
+            break;
+    }
     
     document.body.appendChild(notification);
     
+    // Auto-remove after 3 seconds
     setTimeout(() => {
         notification.remove();
     }, 3000);
+}
+
+// Add this function to handle form validation errors
+function handleFormValidationError(formId, error) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'form-error';
+    errorDiv.style.color = '#dc3545';
+    errorDiv.style.marginBottom = '10px';
+    errorDiv.style.padding = '8px';
+    errorDiv.style.borderRadius = '4px';
+    errorDiv.textContent = error;
+
+    const form = document.getElementById(formId);
+    const existingError = form.querySelector('.form-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    form.insertBefore(errorDiv, form.firstChild);
 }
 
 // Add this function to handle section options based on class selection
@@ -1835,9 +2281,9 @@ function validateCourseForm(form) {
 
     // Course Code validation
     const courseCodeInput = form['courseCode'];
-    const courseCodePattern = /^[A-Z]{2,3}\d{3}$/;
+    const courseCodePattern = /^[A-Z]{2,3}\d+$/;
     if (courseCodeInput.value && !courseCodePattern.test(courseCodeInput.value)) {
-        markInvalid(courseCodeInput, 'Course code must be in format: CS101');
+        markInvalid(courseCodeInput, 'Course Code must start with 2-3 letters followed by numbers');
         isValid = false;
     }
 
@@ -1915,8 +2361,8 @@ function updateAttendanceTable(records = attendanceRecords) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${record.date}</td>
-            <td>${record.class}th Class</td>
-            <td>${record.section}</td>
+            <td>${record.department}</td>
+            <td>${record.semester}${getOrdinalSuffix(record.semester)} Semester</td>
             <td>${record.totalStudents}</td>
             <td>${record.present}</td>
             <td>${record.absent}</td>
@@ -1947,8 +2393,8 @@ function updateExamTable(records = examRecords) {
         row.innerHTML = `
             <td>${record.studentId}</td>
             <td>${record.name}</td>
-            <td>${record.class}th Class</td>
-            <td>${record.section}</td>
+            <td>${record.department}</td>
+            <td>${record.semester}${getOrdinalSuffix(record.semester)} Semester</td>
             <td>${record.examType}</td>
             <td>${record.subject}</td>
             <td>${record.marks}</td>
@@ -1982,8 +2428,8 @@ function updateFeedbackTable(records = studentFeedback) {
             <td>${record.date}</td>
             <td>${record.studentId}</td>
             <td>${record.name}</td>
-            <td>${record.class}th Class</td>
-            <td>${record.section}</td>
+            <td>${record.department}</td>
+            <td>${record.semester}${getOrdinalSuffix(record.semester)} Semester</td>
             <td>${record.category}</td>
             <td>${record.issue}</td>
             <td>${record.solution}</td>
@@ -1996,93 +2442,6 @@ function updateFeedbackTable(records = studentFeedback) {
         `;
         tbody.appendChild(row);
     });
-}
-
-function updateAttendanceSectionOptions() {
-    const classSelect = document.getElementById('attendanceClass');
-    const sectionSelect = document.getElementById('attendanceSection');
-    const selectedClass = classSelect.value;
-
-    // Clear existing options
-    sectionSelect.innerHTML = '<option value="">Select Section</option>';
-
-    if (selectedClass === '9' || selectedClass === '10') {
-        // Add sections for 9th and 10th
-        const sections = ['Computer Science', 'Biology'];
-        sections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            sectionSelect.appendChild(option);
-        });
-    } else if (selectedClass === '11' || selectedClass === '12') {
-        // Add sections for 11th and 12th
-        const sections = ['Pre-Medical', 'Pre-Engineering'];
-        sections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            sectionSelect.appendChild(option);
-        });
-    }
-}
-
-function updateExamSectionOptions() {
-    const classSelect = document.getElementById('examClass');
-    const sectionSelect = document.getElementById('examSection');
-    const selectedClass = classSelect.value;
-
-    // Clear existing options
-    sectionSelect.innerHTML = '<option value="">Select Section</option>';
-
-    if (selectedClass === '9' || selectedClass === '10') {
-        // Add sections for 9th and 10th
-        const sections = ['Computer Science', 'Biology'];
-        sections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            sectionSelect.appendChild(option);
-        });
-    } else if (selectedClass === '11' || selectedClass === '12') {
-        // Add sections for 11th and 12th
-        const sections = ['Pre-Medical', 'Pre-Engineering'];
-        sections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            sectionSelect.appendChild(option);
-        });
-    }
-}
-
-function updateFeedbackSectionOptions() {
-    const classSelect = document.getElementById('feedbackClass');
-    const sectionSelect = document.getElementById('feedbackSection');
-    const selectedClass = classSelect.value;
-
-    // Clear existing options
-    sectionSelect.innerHTML = '<option value="">Select Section</option>';
-
-    if (selectedClass === '9' || selectedClass === '10') {
-        // Add sections for 9th and 10th
-        const sections = ['Computer Science', 'Biology'];
-        sections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            sectionSelect.appendChild(option);
-        });
-    } else if (selectedClass === '11' || selectedClass === '12') {
-        // Add sections for 11th and 12th
-        const sections = ['Pre-Medical', 'Pre-Engineering'];
-        sections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            sectionSelect.appendChild(option);
-        });
-    }
 }
 
 function updateFeedbackStatus(studentId) {
@@ -2116,28 +2475,33 @@ function previewImage(input, previewId) {
 // Add these functions after other initialization code
 function initializeDepartmentManagement() {
     const departmentForm = document.getElementById('departmentForm');
+    const newDepartmentInput = document.getElementById('newDepartment');
     const departmentList = document.getElementById('departmentList');
+
+    if (!departmentForm || !newDepartmentInput || !departmentList) return;
 
     // Initial population of department list
     updateDepartmentList();
 
-    // Handle department form submission
-    departmentForm?.addEventListener('submit', (e) => {
+    departmentForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const newDepartmentInput = document.getElementById('newDepartment');
-        const departmentName = newDepartmentInput.value.trim();
+        const newDepartment = newDepartmentInput.value.trim();
 
-        if (departmentName) {
-            if (!departments.includes(departmentName)) {
-                departments.push(departmentName);
-                updateDepartmentList();
-                updateAllDepartmentDropdowns();
-                showNotification('Department added successfully!', 'success');
-            } else {
-                showNotification('Department already exists!', 'error');
-            }
-            newDepartmentInput.value = '';
+        if (!newDepartment) {
+            showNotification('Please enter a department name', 'error');
+            return;
         }
+
+        if (departments.includes(newDepartment)) {
+            showNotification('Department already exists', 'error');
+            return;
+        }
+
+        departments.push(newDepartment);
+        updateDepartmentList();
+        updateAllDepartmentDropdowns(); // This will now update the program dropdown too
+        newDepartmentInput.value = '';
+        showNotification('Department added successfully');
     });
 }
 
@@ -2160,46 +2524,47 @@ function updateDepartmentList() {
 }
 
 function deleteDepartment(departmentName) {
-    if (confirm(`Are you sure you want to delete the department "${departmentName}"?`)) {
+    if (!confirm(`Are you sure you want to delete the department "${departmentName}"?`)) {
+        return;
+    }
+
         const index = departments.indexOf(departmentName);
         if (index > -1) {
             departments.splice(index, 1);
             updateDepartmentList();
-            updateAllDepartmentDropdowns();
-            showNotification('Department deleted successfully!', 'success');
-        }
+        updateAllDepartmentDropdowns(); // This will now update the program dropdown too
+        showNotification('Department deleted successfully');
     }
 }
 
 function updateAllDepartmentDropdowns() {
-    // Update instructor registration form
-    const instructorDepartment = document.getElementById('department');
-    if (instructorDepartment) {
-        const currentValue = instructorDepartment.value;
-        instructorDepartment.innerHTML = '<option value="">Select Department</option>';
-        departments.forEach(dept => {
-            const option = document.createElement('option');
-            option.value = dept;
-            option.textContent = dept;
-            instructorDepartment.appendChild(option);
-        });
-        instructorDepartment.value = currentValue;
-    }
+    // Update department dropdowns in various forms
+    const departmentDropdowns = [
+        document.getElementById('department'),
+        document.getElementById('assignDepartment'),
+        document.getElementById('departmentFilter'),
+        document.getElementById('program') // Add program dropdown to the list
+    ];
 
-    // Update assign course form
-    const assignDepartment = document.getElementById('assignDepartment');
-    if (assignDepartment) {
-        const currentValue = assignDepartment.value;
-        assignDepartment.innerHTML = '<option value="">Select Department</option>';
+    departmentDropdowns.forEach(dropdown => {
+        if (dropdown) {
+            const currentValue = dropdown.value;
+            dropdown.innerHTML = '<option value="">Select Department</option>';
+            
         departments.forEach(dept => {
             const option = document.createElement('option');
             option.value = dept;
             option.textContent = dept;
-            assignDepartment.appendChild(option);
-        });
-        assignDepartment.value = currentValue;
-    }
-} 
+                dropdown.appendChild(option);
+            });
+
+            // Restore the previously selected value if it still exists
+            if (currentValue && departments.includes(currentValue)) {
+                dropdown.value = currentValue;
+            }
+        }
+    });
+}
 
 // Add function to update student status
 function updateStudentStatus(studentId, newStatus) {
@@ -2281,7 +2646,11 @@ function getRecipientText(recipients) {
     if (recipients.allStudents) {
         let text = 'All Students';
         if (recipients.department) {
-            text += ` (${recipients.department}`;
+            if (recipients.department === 'all') {
+                text += ' (All Departments';
+            } else {
+                text += ` (${recipients.department}`;
+            }
             if (recipients.semester) {
                 text += `, Semester ${recipients.semester}`;
             }
@@ -2365,4 +2734,132 @@ function deleteAnnouncement(announcementId) {
         showNotification('Announcement deleted successfully!', 'success');
     }
 }
+
+// Add CSS styles for form validation and notifications
+document.addEventListener('DOMContentLoaded', function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .form-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545 !important;
+            padding-right: calc(1.5em + 0.75rem);
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .is-valid {
+            border-color: #28a745 !important;
+            padding-right: calc(1.5em + 0.75rem);
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 4px;
+            z-index: 9999;
+            min-width: 250px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification-success {
+            background-color: #28a745;
+            color: #fff;
+        }
+        
+        .notification-error {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        
+        .notification-info {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        
+        .notification-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Add function to populate department dropdowns
+function populateDepartmentDropdowns() {
+    const departmentDropdowns = [
+        document.getElementById('attendanceDepartment'),
+        document.getElementById('examDepartment'),
+        document.getElementById('feedbackDepartment')
+    ];
+
+    departmentDropdowns.forEach(dropdown => {
+        if (dropdown) {
+            dropdown.innerHTML = '<option value="">Select Department</option>';
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+                dropdown.appendChild(option);
+            });
+        }
+    });
+}
+
+// Add function to populate semester dropdowns
+function populateSemesterDropdowns() {
+    const semesterDropdowns = [
+        document.getElementById('attendanceSemester'),
+        document.getElementById('examSemester'),
+        document.getElementById('feedbackSemester')
+    ];
+
+    semesterDropdowns.forEach(dropdown => {
+        if (dropdown) {
+            dropdown.innerHTML = '<option value="">Select Semester</option>';
+            for (let i = 1; i <= 8; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${i}${getOrdinalSuffix(i)} Semester`;
+                dropdown.appendChild(option);
+            }
+        }
+    });
+}
+
+// Call these functions when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    populateDepartmentDropdowns();
+    populateSemesterDropdowns();
+});
   
