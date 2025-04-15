@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle instructor form submission
-    instructorForm?.addEventListener('submit', (e) => {
+    instructorForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         if (!validateInstructorForm(instructorForm)) {
@@ -383,8 +383,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const formData = new FormData(instructorForm);
-        const newInstructor = {
-            id: formData.get('instructorId'),
+        const instructorData = {
+            instructorId: formData.get('instructorId'),
             firstName: formData.get('firstName'),
             lastName: formData.get('lastName'),
             email: formData.get('email'),
@@ -393,24 +393,45 @@ document.addEventListener('DOMContentLoaded', function() {
             department: formData.get('department'),
             qualification: formData.get('qualification'),
             specialization: formData.get('specialization'),
-            experience: formData.get('experience'),
-            status: formData.get('instructorStatus') || 'Active'
+            experience: parseInt(formData.get('experience'))
         };
 
-        const existingIndex = instructors.findIndex(i => i.id === newInstructor.id);
-        if (existingIndex >= 0) {
-            instructors[existingIndex] = newInstructor;
-            showNotification('Instructor information updated successfully!', 'success');
-        } else {
-            instructors.push(newInstructor);
-            showNotification('Instructor registered successfully!', 'success');
-        }
+        try {
+            console.log('Sending instructor data:', instructorData); // Debug log
 
-        updateInstructorTable();
-        instructorForm.reset();
-        instructorFormContainer.style.display = 'none';
-        clearValidationStates(instructorForm);
-        updateDashboardStats();
+            const response = await fetch('crud/user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(instructorData)
+            });
+
+            console.log('Response status:', response.status); // Debug log
+
+            const result = await response.json();
+            console.log('Response data:', result); // Debug log
+
+            if (result.success) {
+                showNotification(result.message, 'success');
+                // Add the new instructor to the local array with default values
+                const newInstructor = {
+                    ...instructorData,
+                    courses: []  // Initialize empty courses array
+                };
+                instructors.push(newInstructor);
+                updateInstructorTable();
+                instructorForm.reset();
+                instructorFormContainer.style.display = 'none';
+                clearValidationStates(instructorForm);
+                updateDashboardStats();
+            } else {
+                showNotification(result.message || 'Failed to register instructor', 'error');
+            }
+        } catch (error) {
+            console.error('Error details:', error); // Debug log
+            showNotification('Failed to register instructor. Please try again.', 'error');
+        }
     });
 
     // Instructor search functionality
@@ -1414,7 +1435,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        return recipients.join(', ');
+        return recipients.join(', ') || 'None selected';
     }
 
     // Initialize announcement form
@@ -1557,20 +1578,20 @@ function updateInstructorTable(instructorList = instructors) {
     instructorList.forEach(instructor => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${instructor.id}</td>
+            <td>${instructor.instructorId}</td>
             <td>${instructor.firstName} ${instructor.lastName}</td>
             <td>${instructor.email || 'null'}</td>
             <td>No courses assigned</td>
-            <td><span class="status-${instructor.status.toLowerCase()}">${instructor.status}</span></td>
+            <td><span class="status-active">Active</span></td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-action btn-view" onclick="viewInstructor('${instructor.id}')" title="View Details">
+                    <button class="btn-action btn-view" onclick="viewInstructor('${instructor.instructorId}')" title="View Details">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-action btn-edit" onclick="editInstructor('${instructor.id}')" title="Edit">
+                    <button class="btn-action btn-edit" onclick="editInstructor('${instructor.instructorId}')" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-action btn-delete" onclick="deleteInstructor('${instructor.id}')" title="Delete">
+                    <button class="btn-action btn-delete" onclick="deleteInstructor('${instructor.instructorId}')" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -1580,8 +1601,16 @@ function updateInstructorTable(instructorList = instructors) {
     });
 }
 
+function deleteInstructor(instructorId) {
+    if (confirm('Are you sure you want to delete this instructor?')) {
+        instructors = instructors.filter(i => i.instructorId !== instructorId);
+        updateInstructorTable();
+        showNotification('Instructor deleted successfully!');
+    }
+}
+
 function viewInstructor(instructorId) {
-    const instructor = instructors.find(i => i.id === instructorId);
+    const instructor = instructors.find(i => i.instructorId === instructorId);
     if (instructor) {
         // Create modal HTML
         const modalHTML = `
@@ -1589,14 +1618,11 @@ function viewInstructor(instructorId) {
                 <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px;">
                     <span class="close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; right: 20px; top: 10px;">&times;</span>
                     <div class="instructor-details" style="display: flex; gap: 20px;">
-                        <div class="instructor-image" style="flex: 0 0 200px;">
-                            <img src="${instructor.picture || './images/default-avatar.png'}" alt="Instructor Picture" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
-                        </div>
                         <div class="instructor-info" style="flex: 1;">
                             <h2 style="margin-bottom: 20px;">Instructor Details</h2>
                             <div class="info-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                                 <div class="info-item">
-                                    <strong>Instructor ID:</strong> ${instructor.id}
+                                    <strong>Instructor ID:</strong> ${instructor.instructorId}
                                 </div>
                                 <div class="info-item">
                                     <strong>Name:</strong> ${instructor.firstName} ${instructor.lastName}
@@ -1620,7 +1646,7 @@ function viewInstructor(instructorId) {
                                     <strong>Experience:</strong> ${instructor.experience} years
                                 </div>
                                 <div class="info-item">
-                                    <strong>Status:</strong> <span class="status-${instructor.status.toLowerCase()}" style="padding: 3px 8px; border-radius: 4px; background-color: ${instructor.status === 'Active' ? '#28a745' : '#dc3545'}; color: white;">${instructor.status}</span>
+                                    <strong>Status:</strong> <span class="status-active">Active</span>
                                 </div>
                                 <div class="info-item" style="grid-column: 1 / -1;">
                                     <strong>Specialization:</strong> ${instructor.specialization}
@@ -1779,12 +1805,12 @@ function editStudent(studentId) {
 }
 
 function editInstructor(instructorId) {
-    const instructor = instructors.find(i => i.id === instructorId);
+    const instructor = instructors.find(i => i.instructorId === instructorId);
     if (instructor) {
         const form = document.getElementById('instructorForm');
         
         // Set values
-        form.instructorId.value = instructor.id;
+        form.instructorId.value = instructor.instructorId;
         form.instructorId.readOnly = true; // Make ID field read-only
         form.instructorId.style.backgroundColor = '#f0f0f0'; // Visual indication that field is read-only
         
@@ -1829,14 +1855,6 @@ function deleteStudent(studentId) {
         } else {
             showNotification('Error deleting student', 'error');
         }
-    }
-}
-
-function deleteInstructor(instructorId) {
-    if (confirm('Are you sure you want to delete this instructor?')) {
-        instructors = instructors.filter(i => i.id !== instructorId);
-        updateInstructorTable();
-        showNotification('Instructor deleted successfully!');
     }
 }
 
@@ -2336,7 +2354,7 @@ function updateInstructorOptions() {
     // Add instructor options
     instructors.forEach(instructor => {
         const option = document.createElement('option');
-        option.value = `${instructor.firstName} ${instructor.lastName}`;
+        option.value = instructor.instructorId;
         option.textContent = `${instructor.firstName} ${instructor.lastName}`;
         instructorSelect.appendChild(option);
     });
