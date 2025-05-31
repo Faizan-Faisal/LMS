@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@types/react-toastify": "^4.1.0"
+  },
+  "dependencies": {
+    "react-toastify": "^11.0.5"
+  }
+}
