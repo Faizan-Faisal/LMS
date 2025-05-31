@@ -1,3 +1,4 @@
+
 # University LMS (Learning Management System)
 
 A comprehensive Learning Management System built with React, FastAPI, and MySQL.
@@ -11,7 +12,7 @@ A comprehensive Learning Management System built with React, FastAPI, and MySQL.
 ```
 LMS_PROJECT/
 ├── frontend/           # React frontend application
-├── backend/           # FastAPI backend application
+├── backend/           # FastAPI backend applications
 └── database/          # Database schemas and migrations
 ```
 
@@ -74,3 +75,7 @@ LMS_PROJECT/
 
 ## API Documentation
 Once the backend server is running, visit `http://localhost:8000/docs` for the interactive API documentation. 
+
+# LMS
+This is an learning management system which I made for my university 
+
