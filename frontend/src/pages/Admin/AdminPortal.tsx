@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import ManageInstructors from './ManageInstructors';
 import ManageStudents from './ManageStudents';
+import ManageSettings from './ManageSettings';
 
 const navItems = [
   { label: 'Dashboard', path: '/admin', icon: (
@@ -25,7 +26,7 @@ const navItems = [
   { label: 'Reports', path: '#', icon: (
     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-6 4h6a2 2 0 002-2v-5a2 2 0 00-2-2h-2a2 2 0 00-2 2v5a2 2 0 002 2z" /></svg>
   ) },
-  { label: 'Settings', path: '#', icon: (
+  { label: 'Settings', path: '/admin/settings', icon: (
     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19a7 7 0 100-14 7 7 0 000 14z" /></svg>
   ) },
   { label: 'Logout', path: '#', icon: (
@@ -119,6 +120,7 @@ const AdminPortal: React.FC = () => {
           } />
           <Route path="instructors" element={<ManageInstructors />} />
           <Route path="students" element={<ManageStudents />} />
+          <Route path="settings" element={<ManageSettings />} />
         </Routes>
       </main>
     </div>

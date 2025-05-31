@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getInstructors, addInstructor, updateInstructor, deleteInstructor } from '../../api/instructorapi';
+import { getInstructors, addInstructor, getInstructorById, updateInstructor, deleteInstructor } from '../../api/instructorapi';
+import { getdepartments , adddepartment , getdepartmentByName , deletedepartment} from '../../api/departmentapi';
+import { toast } from 'react-toastify';
 
 interface Instructor {
   instructor_id: number;
@@ -13,13 +15,14 @@ interface Instructor {
   picture?: string;
   courses?: string;
   status?: 'Active' | 'Inactive';
-  phone?: string;
+  phone_number?: string;
   specialization?: string;
 }
 
 const ManageInstructors: React.FC = () => {
   const [search, setSearch] = useState('');
   const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [departments, setDepartments] = useState<string[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState<'add' | 'edit'>('add');
   const [selected, setSelected] = useState<Instructor | null>(null);
@@ -40,11 +43,25 @@ const ManageInstructors: React.FC = () => {
   });
   const [picturePreview, setPicturePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [instructorToDelete, setInstructorToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     fetchInstructors();
+    fetchDepartments();
   }, []);
-
+  
+  const fetchDepartments = async () => {
+    try {
+      const res = await getdepartments();
+      const departmentNames = res.data.map((dept: any) => dept.department_name);
+      setDepartments(departmentNames);
+    } catch (err) {
+      console.error('Error fetching departments:', err);
+      toast.error('Failed to load departments.');
+    }
+  };
+  
   const fetchInstructors = async () => {
     try {
       setLoading(true);
@@ -52,6 +69,7 @@ const ManageInstructors: React.FC = () => {
       setInstructors(res.data);
     } catch (err) {
       console.error('Error fetching instructors:', err);
+      toast.error('Failed to fetch instructors.');
     } finally {
       setLoading(false);
     }
@@ -88,36 +106,53 @@ const ManageInstructors: React.FC = () => {
   const handleEdit = (ins: Instructor) => {
     setFormType('edit');
     setSelected(ins);
+    // Construct the full picture URL if a picture filename exists
+    const pictureUrl = ins.picture ? `http://localhost:8000/uploads/${ins.picture}` : null; // Construct full URL
+
     setFormData({
       instructor_id: ins.instructor_id,
       first_name: ins.first_name,
       last_name: ins.last_name,
       email: ins.email,
-      phone_number: ins.phone || '',
+      phone: ins.phone_number || '',
       cnic: ins.cnic,
       department: ins.department,
       qualification: ins.qualification,
       specialization: ins.specialization || '',
       year_of_experience: ins.year_of_experience,
-      picture: ins.picture || '',
+      picture: ins.picture || '', // Keep the filename in formData if needed elsewhere
       pictureFile: null,
     });
-    setPicturePreview(ins.picture || null);
+    setPicturePreview(pictureUrl); // Use the constructed URL for preview
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this instructor?')) {
-      try {
-        setLoading(true);
-        await deleteInstructor(id);
-        fetchInstructors();
-      } catch (err) {
-        console.error('Error deleting instructor:', err);
-      } finally {
-        setLoading(false);
-      }
+  const handleDelete = (id: number) => {
+    setInstructorToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (instructorToDelete === null) return; // Should not happen if modal is open correctly
+
+    try {
+      setLoading(true);
+      await deleteInstructor(instructorToDelete);
+      toast.success('Instructor deleted successfully.');
+      fetchInstructors(); // Refresh list
+    } catch (err) {
+      console.error('Error deleting instructor:', err);
+      toast.error('Failed to delete instructor.');
+    } finally {
+      setLoading(false);
+      setShowDeleteModal(false);
+      setInstructorToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setInstructorToDelete(null);
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -134,8 +169,55 @@ const ManageInstructors: React.FC = () => {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+
+    // --- Input Validation ---
+    const phoneRegex = /^3\d{2}-\d{4}-\d{3}$/;
+    const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
+    const instructorIdRegex = /^INS\d+$/; // Regex to check for INS prefix followed by numbers
+
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      toast.error('Invalid Phone Number format. Expected: 3xx-xxxx-xxx');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.cnic && !cnicRegex.test(formData.cnic)) {
+      toast.error('Invalid CNIC format. Expected: xxxxx-xxxxxxx-x');
+      setLoading(false);
+      return;
+    }
+
+    if (formType === 'add') {
+      // Validate Instructor ID format
+      if (!instructorIdRegex.test(formData.instructor_id)) {
+        toast.error('Invalid Instructor ID format. Must start with INS followed by numbers.');
+        setLoading(false);
+        return; // Stop submission
+      }
+
+      // Check if instructor_id already exists
+      try {
+        await getInstructorById(formData.instructor_id);
+        // If successful, instructor exists
+        toast.error('Instructor with this ID already exists.');
+        setLoading(false);
+        return; // Stop submission
+      } catch (err: any) {
+        // If error is 404, instructor does not exist, proceed.
+        if (err.response && err.response.status === 404) {
+          // continue to add
+        } else {
+          // Other error during check
+          console.error('Error checking instructor ID:', err);
+          toast.error('Error checking instructor ID.');
+          setLoading(false);
+          return; // Stop submission due to unexpected error
+        }
+      }
+    }
+
     try {
-      setLoading(true);
       const data = new FormData();
       data.append('instructor_id', formData.instructor_id);
       data.append('first_name', formData.first_name);
@@ -150,15 +232,20 @@ const ManageInstructors: React.FC = () => {
       if (formData.pictureFile) {
         data.append('picture', formData.pictureFile);
       }
+
       if (formType === 'add') {
         await addInstructor(data);
+        toast.success('Instructor registered successfully.');
       } else if (formType === 'edit' && selected) {
         await updateInstructor(selected.instructor_id, data);
+        toast.success('Instructor updated successfully.');
       }
+
       setShowForm(false);
-      fetchInstructors();
-    } catch (err) {
+      fetchInstructors(); // Refresh list
+    } catch (err: any) {
       console.error('Error saving instructor:', err);
+      toast.error(err.response?.data?.detail || 'Failed to save instructor.');
     } finally {
       setLoading(false);
     }
@@ -170,7 +257,7 @@ const ManageInstructors: React.FC = () => {
       first_name: '',
       last_name: '',
       email: '',
-      phone_number: '',
+      phone: '',
       cnic: '',
       department: '',
       qualification: '',
@@ -232,7 +319,7 @@ const ManageInstructors: React.FC = () => {
                       {picturePreview ? (
                         <img src={picturePreview} alt="Profile Preview" className="object-cover w-full h-full" />
                       ) : (
-                        <span className="text-gray-400">Profile Preview</span>
+                        <span className="text-gray-400">{formType === 'edit' && selected?.picture ? 'Picture not found' : 'Profile Preview'}</span>
                       )}
                     </div>
                     <input type="file" name="picture" accept="image/*" onChange={handleFormChange} className="w-full" />
@@ -242,7 +329,16 @@ const ManageInstructors: React.FC = () => {
                   <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block mb-1 font-semibold">Instructor ID</label>
-                      <input name="instructor_id" type="text" placeholder="e.g., INS001" className="w-full px-4 py-2 border rounded-lg" value={formData.instructor_id} onChange={handleFormChange} required />
+                      <input 
+                        name="instructor_id" 
+                        type="text" 
+                        placeholder="e.g., INS001" 
+                        className="w-full px-4 py-2 border rounded-lg {formType === 'edit' ? 'bg-gray-100 cursor-not-allowed' : ''}"
+                        value={formData.instructor_id}
+                        onChange={handleFormChange}
+                        required
+                        readOnly={formType === 'edit'}
+                      />
                       <span className="text-xs text-gray-400">Must start with INS followed by numbers</span>
                     </div>
                     <div>
@@ -267,13 +363,17 @@ const ManageInstructors: React.FC = () => {
                     </div>
                     <div>
                       <label className="block mb-1 font-semibold">Department</label>
-                      <select name="department" className="w-full px-4 py-2 border rounded-lg" value={formData.department} onChange={handleFormChange} required>
+                      <select
+                        name="department"
+                        value={formData.department}
+                        onChange={handleFormChange}
+                        className="w-full px-4 py-2 border rounded-lg"
+                        required
+                      >
                         <option value="">Select Department</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Physics">Physics</option>
-                        <option value="Chemistry">Chemistry</option>
-                        <option value="Biology">Biology</option>
+                        {departments.map((dept) => (
+                          <option key={dept} value={dept}>{dept}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
@@ -293,7 +393,7 @@ const ManageInstructors: React.FC = () => {
                 <div className="flex flex-row gap-4 justify-end">
                   <button type="button" className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300" onClick={handleReset}>Reset Form</button>
                   <button type="button" className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300" onClick={() => setShowForm(false)}>Cancel</button>
-                  <button type="submit" className="px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">{formType === 'add' ? 'Register Instructor' : 'Update Instructor'}</button>
+                  <button type="submit" className="px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">{loading ? 'Processing...' : formType === 'add' ? 'Register Instructor' : 'Update Instructor'}</button>
                 </div>
               </form>
             </div>
@@ -370,6 +470,7 @@ const ManageInstructors: React.FC = () => {
               <div><span className="font-semibold">ID:</span> {viewed.instructor_id}</div>
               <div><span className="font-semibold">Name:</span> {viewed.first_name} {viewed.last_name}</div>
               <div><span className="font-semibold">Email:</span> {viewed.email}</div>
+              <div><span className="font-semibold">Phone:</span> {viewed.phone_number || 'N/A'}</div>
               <div><span className="font-semibold">CNIC:</span> {viewed.cnic}</div>
               <div><span className="font-semibold">Department:</span> {viewed.department}</div>
               <div><span className="font-semibold">Qualification:</span> {viewed.qualification}</div>
@@ -379,6 +480,31 @@ const ManageInstructors: React.FC = () => {
             </div>
             <div className="flex justify-end">
               <button onClick={closeView} className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Custom Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold mb-4">Confirm Deletion</h3>
+            <p>Are you sure you want to delete this instructor?</p>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                disabled={loading}
+              >
+                {loading ? 'Deleting...' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>
