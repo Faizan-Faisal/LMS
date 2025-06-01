@@ -61,7 +61,6 @@ const ManageStudents: React.FC = () => {
       const programNames = res.data.map((dept: any) => dept.department_name); // Use department_name
       setPrograms(programNames);
     } catch (err) {
-      console.error('Error fetching programs (departments):', err);
       toast.error('Failed to load programs.');
     }
   };
@@ -69,12 +68,12 @@ const ManageStudents: React.FC = () => {
   const fetchSections = async () => {
     try {
       const res = await getSections();
-      console.log('Sections API response:', res.data);
+
       // Assuming sections API returns an array of section objects with a 'section_name' property
       const sectionNames = res.data.map((sec: any) => sec.section_name); // Use section_name
       setSections(sectionNames);
     } catch (err) {
-      console.error('Error fetching sections:', err);
+
       toast.error('Failed to load sections.');
     }
   };
@@ -85,7 +84,7 @@ const ManageStudents: React.FC = () => {
       const res = await getStudents();
       setStudents(res.data);
     } catch (err) {
-      console.error('Error fetching students:', err);
+
       toast.error('Failed to fetch students.');
     } finally {
       setLoading(false);
@@ -95,10 +94,7 @@ const ManageStudents: React.FC = () => {
   const filtered = students.filter(
     (student) =>
       `${student.first_name} ${student.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
-      student.student_id.toLowerCase().includes(search.toLowerCase()) ||
-      student.email.toLowerCase().includes(search.toLowerCase()) ||
-      student.program.toLowerCase().includes(search.toLowerCase()) ||
-      student.section.toLowerCase().includes(search.toLowerCase())
+      student.student_id.toLowerCase().includes(search.toLowerCase()) 
       // Add other searchable fields as needed
   );
 
@@ -158,7 +154,6 @@ const ManageStudents: React.FC = () => {
       toast.success('Student deleted successfully.');
       fetchStudents();
     } catch (err) {
-      console.error('Error deleting student:', err);
       toast.error('Failed to delete student.');
     } finally {
       setLoading(false);
@@ -290,7 +285,7 @@ const ManageStudents: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
             <input
               type="text"
-              placeholder="Search by Student Name, ID, Email, Program, Section..."
+              placeholder="Search by Student Name, ID"
               className="w-full md:w-80 px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:bg-white"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
