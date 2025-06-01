@@ -1,46 +1,46 @@
 from sqlalchemy.orm import Session
-from models.instructor import Instructor
+from models.student import Student
 
-# CREATE instructor
-def create_instructor(db: Session, instructor_data: dict):
-    instructor = Instructor(**instructor_data)
-    db.add(instructor)
+# CREATE student
+def create_student(db: Session, student_data: dict):
+    student = Student(**student_data)
+    db.add(student)
     db.commit()
-    db.refresh(instructor)
-    return instructor
+    db.refresh(student)
+    return student
 
-# GET all instructors
-def get_instructors(db: Session):
-    return db.query(Instructor).all()
+# GET all students
+def get_students(db: Session):
+    return db.query(Student).all()
 
-# SEARCH instructor by name or ID
-def search_instructor(db: Session, keyword: str):
-    return db.query(Instructor).filter(
-        (Instructor.instructor_id.ilike(f"%{keyword}%")) |
-        (Instructor.first_name.ilike(f"%{keyword}%")) |
-        (Instructor.last_name.ilike(f"%{keyword}%"))
+# SEARCH student by name or ID
+def search_student(db: Session, keyword: str):
+    return db.query(Student).filter(
+        (Student.student_id.ilike(f"%{keyword}%")) |
+        (Student.first_name.ilike(f"%{keyword}%")) |
+        (Student.last_name.ilike(f"%{keyword}%"))
     ).all()
 
-def get_instructor_by_id(db: Session, instructor_id: str):
-    return db.query(Instructor).filter(Instructor.instructor_id == instructor_id).first()
+def get_student_by_id(db: Session, student_id: str):
+    return db.query(Student).filter(Student.student_id == student_id).first()
 
 
-# UPDATE instructor
-def update_instructor(db: Session, instructor_id: str, updated_data: dict):
-    instructor = db.query(Instructor).filter(Instructor.instructor_id == instructor_id).first()
-    if instructor:
+# UPDATE student
+def update_student(db: Session, student_id: str, updated_data: dict):
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    if student:
         for key, value in updated_data.items():
-            setattr(instructor, key, value)
+            setattr(student, key, value)
         db.commit()
-        db.refresh(instructor)
-        return instructor
+        db.refresh(student)
+        return student
     return None
 
-# DELETE instructor
-def delete_instructor(db: Session, instructor_id: str):
-    instructor = db.query(Instructor).filter(Instructor.instructor_id == instructor_id).first()
-    if instructor:
-        db.delete(instructor)
+# DELETE student
+def delete_student(db: Session, student_id: str):
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    if student:
+        db.delete(student)
         db.commit()
         return True
     return False

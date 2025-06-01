@@ -4,7 +4,7 @@ import { getdepartments , adddepartment , getdepartmentByName , deletedepartment
 import { toast } from 'react-toastify';
 
 interface Instructor {
-  instructor_id: number;
+  instructor_id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -44,7 +44,7 @@ const ManageInstructors: React.FC = () => {
   const [picturePreview, setPicturePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [instructorToDelete, setInstructorToDelete] = useState<number | null>(null);
+  const [instructorToDelete, setInstructorToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInstructors();
@@ -127,7 +127,7 @@ const ManageInstructors: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setInstructorToDelete(id);
     setShowDeleteModal(true);
   };

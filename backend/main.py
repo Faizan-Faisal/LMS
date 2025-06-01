@@ -43,7 +43,7 @@ async def health_check():
 app.include_router(instructor.router, prefix="/api/instructors", tags=["Instructors"])
 app.include_router(department.router, prefix="/api/departments", tags=["Departments"])
 app.include_router(section.router, prefix="/api/sections", tags=["Sections"])
-# app.include_router(student.router, prefix="/api/students", tags=["Students"])
+app.include_router(student.router, prefix="/api/students", tags=["Students"])
 # app.include_router(course.router, prefix="/api/courses", tags=["Courses"])
 
 if __name__ == "__main__":

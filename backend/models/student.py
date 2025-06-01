@@ -13,7 +13,7 @@ class Student(Base):
     cnic = Column(String(25), unique=True, nullable=False)
     program = Column(String(100),  ForeignKey("departments.department_name"))
     section = Column(String(100),  ForeignKey("sections.section_name"))
-    enrollment_year = Column(Integer)
+    enrollment_year = Column(Integer, nullable=False)
     picture = Column(String(255))  # This stores image file name or path
 
     # Relationship to Department
