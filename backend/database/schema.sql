@@ -20,14 +20,11 @@ CREATE TABLE instructors (
 
 
 -- Courses table
-CREATE TABLE IF NOT EXISTS courses (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(100) NOT NULL,
-    description TEXT,
-    teacher_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (teacher_id) REFERENCES users(id)
+CREATE TABLE `courses` (
+    `course_id` VARCHAR(20) NOT NULL PRIMARY KEY,
+    `course_name` VARCHAR(100) NOT NULL,
+    `course_description` VARCHAR(255) NOT NULL,
+    `course_credit_hours` INT NOT NULL
 );
 
 -- Course enrollments

@@ -4,6 +4,7 @@ import ManageInstructors from './ManageInstructors';
 import ManageStudents from './ManageStudents';
 import ManageSections from './ManageSections';
 import ManageSettings from './ManageSettings';
+import ManageCourses from './ManageCourses';
 
 const navItems = [
   { label: 'Dashboard', path: '/admin', icon: (
@@ -124,7 +125,7 @@ const AdminPortal: React.FC = () => {
           } />
           <Route path="instructors" element={<ManageInstructors />} />
           <Route path="students" element={<ManageStudents />} />
-
+          <Route path="courses" element={<ManageCourses />} />
           <Route path="sections" element={<ManageSections />} />
           <Route path="settings" element={<ManageSettings />} />
         </Routes>
