@@ -5,7 +5,7 @@ from crud import section as crud
 import shutil
 import os
 
-router = APIRouter(prefix="/sectoins", tags=["Sections"])
+router = APIRouter(prefix="/sections", tags=["Sections"])
 
 
 # CREATE section

@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-
-const BASE_URL = 'http://localhost:8000/api/sections';
+const BASE_URL = 'http://localhost:8000/api/sections'; // Base URL without the final /sections/
 
 export const getSections = () => axios.get(`${BASE_URL}/sections/`);
-export const addSections = (data: any) => axios.post(`${BASE_URL}/sections/`, data);
-export const getSectionsByName = (name: string) => axios.get(`${BASE_URL}/sections/${name}`);
-export const updateSections = (name: string, data: any) => axios.put(`${BASE_URL}/sections/${name}`, data);
-export const deleteSections = (name: string) => axios.delete(`${BASE_URL}/sections/${name}`);
+export const addSection = (data: any) => axios.post(`${BASE_URL}/sections/`, new URLSearchParams(data));
+export const getSectionByName = (name: string) => axios.get(`${BASE_URL}/sections/${name}`);
+export const updateSection = (name: string, data: any) => axios.put(`${BASE_URL}/sections/${name}`, data);
+export const deleteSection = (name: string) => axios.delete(`${BASE_URL}/sections/${name}`);

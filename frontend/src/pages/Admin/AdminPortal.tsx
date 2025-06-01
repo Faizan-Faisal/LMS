@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import ManageInstructors from './ManageInstructors';
 import ManageStudents from './ManageStudents';
+import ManageSections from './ManageSections';
 import ManageSettings from './ManageSettings';
 
 const navItems = [
@@ -14,10 +15,13 @@ const navItems = [
   { label: 'Manage Students', path: '/admin/students', icon: (
     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 000 7.75" /></svg>
   ) },
-  { label: 'Manage Courses', path: '#', icon: (
+  { label: 'Manage Departments', path: '/admin/departments', icon: (
+    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7h18M3 12h18M3 17h18" /></svg>
+  ) },
+  { label: 'Manage Courses', path: '/admin/courses', icon: (
     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0 0H3" /></svg>
   ) },
-  { label: 'Manage Sections', path: '#', icon: (
+  { label: 'Manage Sections', path: '/admin/sections', icon: (
     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
   ) },
   { label: 'Announcements', path: '#', icon: (
@@ -120,6 +124,8 @@ const AdminPortal: React.FC = () => {
           } />
           <Route path="instructors" element={<ManageInstructors />} />
           <Route path="students" element={<ManageStudents />} />
+
+          <Route path="sections" element={<ManageSections />} />
           <Route path="settings" element={<ManageSettings />} />
         </Routes>
       </main>
