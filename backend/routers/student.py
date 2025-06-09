@@ -5,7 +5,7 @@ from crud import student as crud
 import shutil
 import os
 
-router = APIRouter(prefix="/students", tags=["Students"])
+router = APIRouter(tags=["Students"])
 UPLOAD_DIR = "upload_student_img/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -72,6 +72,7 @@ def update_student(
     first_name: str = Form(...),
     last_name: str = Form(...),
     email: str = Form(...),
+    phone_number: str = Form(...),
     cnic: str = Form(...),
     program: str = Form(...),
     section: str = Form(...),
@@ -101,8 +102,6 @@ def update_student(
     if not updated:
         raise HTTPException(status_code=404, detail="student not found")
     return updated
-
-
 
 # DELETE student
 @router.delete("/{student_id}")

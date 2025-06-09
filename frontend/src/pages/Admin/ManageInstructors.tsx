@@ -228,7 +228,7 @@ const ManageInstructors: React.FC = () => {
       data.append('department', formData.department);
       data.append('qualification', formData.qualification);
       data.append('specialization', formData.specialization || '');
-      data.append('year_of_experience', formData.year_of_experience);
+      data.append('year_of_experience', formData.year_of_experience.toString());
       if (formData.pictureFile) {
         data.append('picture', formData.pictureFile);
       }

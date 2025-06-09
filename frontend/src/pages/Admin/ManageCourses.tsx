@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 // Assume courseapi.ts exists with similar functions for courses
-import { getCourses, addCourse, getCourseByName, updateCourse, deleteCourse } from '../../api/courseapi';
+import { getCourses, addCourse, getCourseByName, getCourseById, updateCourse, deleteCourse } from '../../api/courseapi';
+import { createPrerequisite, getAllPrerequisites, getPrerequisitesForCourse, deletePrerequisite } from '../../api/pre_courseapi';
 
 interface Course {
   course_id: string; // Assuming course_id is a string
   course_name: string;
   course_description: string;
   course_credit_hours: number; // Assuming credit hours is a number
+}
+
+interface Prerequisite {
+  prerequisite_id: number;
+  course_id: string;
+  prereq_course_id: string;
 }
 
 const ManageCourses: React.FC = () => {
@@ -26,6 +33,11 @@ const ManageCourses: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<string | null>(null); // Use course_id for deletion
+  const [showPrerequisiteModal, setShowPrerequisiteModal] = useState(false);
+  const [selectedCourseForPrereq, setSelectedCourseForPrereq] = useState<Course | null>(null);
+  const [prerequisiteSearch, setPrerequisiteSearch] = useState('');
+  const [selectedPrerequisites, setSelectedPrerequisites] = useState<Course[]>([]);
+  const [existingPrerequisites, setExistingPrerequisites] = useState<Prerequisite[]>([]);
 
   // Placeholder API functions (replace with actual imports and calls)
   // const getCourses = async () => { console.log('Fetching courses'); return { data: [] }; };
@@ -119,25 +131,24 @@ const ManageCourses: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
-    // --- Input Validation ---
-    // Add course_id format validation if needed
-
-    if (formType === 'add') {
-      // Add course_id existence check if needed
-    }
-
     try {
-      const data = new FormData(); // Use FormData for potential file uploads if needed later, though not required for current fields
-      data.append('course_id', formData.course_id);
-      data.append('course_name', formData.course_name);
-      data.append('course_description', formData.course_description);
-      data.append('course_credit_hours', formData.course_credit_hours);
-
       if (formType === 'add') {
+        const data = new FormData();
+        data.append('course_id', formData.course_id);
+        data.append('course_name', formData.course_name);
+        data.append('course_description', formData.course_description);
+        data.append('course_credit_hours', formData.course_credit_hours);
         await addCourse(data);
         toast.success('Course added successfully.');
       } else if (formType === 'edit' && selected) {
-        await updateCourse(selected.course_id, data);
+        // For update, create FormData directly and pass it to updateCourse
+        const updateFormData = new FormData();
+        updateFormData.append('course_id', selected.course_id); // Required by backend as Form parameter
+        updateFormData.append('course_name', formData.course_name);
+        updateFormData.append('course_description', formData.course_description);
+        updateFormData.append('course_credit_hours', Number(formData.course_credit_hours).toString());
+        
+        await updateCourse(selected.course_name, updateFormData);
         toast.success('Course updated successfully.');
       }
 
@@ -169,6 +180,74 @@ const ManageCourses: React.FC = () => {
   };
   const closeView = () => setViewed(null);
 
+  const handleManagePrerequisites = async (course: Course) => {
+    setSelectedCourseForPrereq(course);
+    setSelectedPrerequisites([]);
+    setPrerequisiteSearch('');
+    try {
+      const res = await getPrerequisitesForCourse(course.course_id);
+      setExistingPrerequisites(res.data);
+      // Fetch the actual course details for each prerequisite
+      const prereqCourses = await Promise.all(
+        res.data.map(async (prereq: Prerequisite) => {
+          const courseRes = await getCourseById(prereq.prereq_course_id);
+          return courseRes.data;
+        })
+      );
+      setSelectedPrerequisites(prereqCourses);
+    } catch (err) {
+      toast.error('Failed to fetch prerequisites123');
+    }
+    setShowPrerequisiteModal(true);
+  };
+
+  const handleAddPrerequisite = (course: Course) => {
+    if (!selectedCourseForPrereq) return;
+    
+    // Check if course is already selected
+    if (selectedPrerequisites.some(p => p.course_id === course.course_id)) {
+      toast.warning('This course is already selected as a prerequisite');
+      return;
+    }
+
+    // Check if trying to add the same course as prerequisite
+    if (course.course_id === selectedCourseForPrereq.course_id) {
+      toast.warning('A course cannot be a prerequisite for itself');
+      return;
+    }
+
+    setSelectedPrerequisites([...selectedPrerequisites, course]);
+    setPrerequisiteSearch('');
+  };
+
+  const handleRemovePrerequisite = (courseId: string) => {
+    setSelectedPrerequisites(selectedPrerequisites.filter(p => p.course_id !== courseId));
+  };
+
+  const handleSavePrerequisites = async () => {
+    if (!selectedCourseForPrereq) return;
+
+    try {
+      setLoading(true);
+      // First, remove all existing prerequisites
+      for (const prereq of existingPrerequisites) {
+        await deletePrerequisite(selectedCourseForPrereq.course_id, prereq.prereq_course_id);
+      }
+
+      // Then add all selected prerequisites
+      for (const course of selectedPrerequisites) {
+        await createPrerequisite(selectedCourseForPrereq.course_id, course.course_id);
+      }
+
+      toast.success('Prerequisites updated successfully');
+      setShowPrerequisiteModal(false);
+    } catch (err) {
+      toast.error('Failed to update prerequisites');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen w-full">
       <div className="w-full max-w-full mx-auto">
@@ -189,6 +268,18 @@ const ManageCourses: React.FC = () => {
                 onClick={handleAdd}
               >
                 Add New Course
+              </button>
+              <button
+                className={`px-5 py-2 rounded-lg font-semibold shadow transition ${
+                  selected 
+                    ? 'bg-green-600 text-white hover:bg-green-700' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                onClick={() => selected && handleManagePrerequisites(selected)}
+                disabled={!selected}
+                title={!selected ? "Select a course first" : "Manage Prerequisites"}
+              >
+                Manage Prerequisites
               </button>
               <button
                 className="bg-blue-100 text-blue-700 px-5 py-2 rounded-lg font-semibold shadow hover:bg-blue-200 transition"
@@ -281,7 +372,17 @@ const ManageCourses: React.FC = () => {
                   </tr>
                 ) : (
                   filtered.map((course) => (
-                    <tr key={course.course_id} className="border-b hover:bg-gray-50 text-sm">
+                    <tr 
+                      key={course.course_id} 
+                      className={`border-b hover:bg-gray-50 text-sm cursor-pointer ${selected?.course_id === course.course_id ? 'bg-blue-50' : ''}`}
+                      onClick={() => {
+                        if (selected?.course_id === course.course_id) {
+                          setSelected(null); // Deselect if already selected
+                        } else {
+                          setSelected(course); // Select if not selected or different course
+                        }
+                      }}
+                    >
                       <td className="py-3 px-4 font-semibold">{course.course_id}</td>
                       <td className="py-3 px-4">{course.course_name}</td>
                       <td className="py-3 px-4">{course.course_description}</td>
@@ -290,21 +391,30 @@ const ManageCourses: React.FC = () => {
                         <button
                           className="flex items-center justify-center w-9 h-9 bg-blue-500 hover:bg-blue-600 rounded text-white transition"
                           title="View"
-                          onClick={() => handleView(course)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleView(course);
+                          }}
                         >
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         </button>
                         <button
                           className="flex items-center justify-center w-9 h-9 bg-orange-500 hover:bg-orange-600 rounded text-white transition"
                           title="Edit"
-                          onClick={() => handleEdit(course)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(course);
+                          }}
                         >
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6 6M3 21h6l11-11a2.828 2.828 0 00-4-4L5 17v4z" /></svg>
                         </button>
                         <button
                           className="flex items-center justify-center w-9 h-9 bg-red-500 hover:bg-red-600 rounded text-white transition"
                           title="Delete"
-                          onClick={() => handleDelete(course.course_id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(course.course_id);
+                          }}
                         >
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>
                         </button>
@@ -354,6 +464,83 @@ const ManageCourses: React.FC = () => {
                 disabled={loading}
               >
                 {loading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Prerequisite Management Modal */}
+      {showPrerequisiteModal && selectedCourseForPrereq && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
+            <h3 className="text-xl font-bold mb-4">
+              Manage Prerequisites for {selectedCourseForPrereq.course_name}
+            </h3>
+            
+            {/* Search for courses to add as prerequisites */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search courses to add as prerequisites..."
+                className="w-full px-4 py-2 border rounded-lg"
+                value={prerequisiteSearch}
+                onChange={(e) => setPrerequisiteSearch(e.target.value)}
+              />
+              <div className="mt-2 max-h-40 overflow-y-auto">
+                {courses
+                  .filter(course => 
+                    (course.course_id.toLowerCase().includes(prerequisiteSearch.toLowerCase()) ||
+                    course.course_name.toLowerCase().includes(prerequisiteSearch.toLowerCase())) &&
+                    course.course_id !== selectedCourseForPrereq.course_id
+                  )
+                  .map(course => (
+                    <div
+                      key={course.course_id}
+                      className="p-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+                      onClick={() => handleAddPrerequisite(course)}
+                    >
+                      <span>{course.course_name} ({course.course_id})</span>
+                      <button className="text-blue-600">Add</button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Selected Prerequisites */}
+            <div className="mb-4">
+              <h4 className="font-semibold mb-2">Selected Prerequisites:</h4>
+              <div className="space-y-2">
+                {selectedPrerequisites.map(course => (
+                  <div
+                    key={course.course_id}
+                    className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                  >
+                    <span>{course.course_name} ({course.course_id})</span>
+                    <button
+                      className="text-red-600 hover:text-red-800"
+                      onClick={() => handleRemovePrerequisite(course.course_id)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                onClick={() => setShowPrerequisiteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleSavePrerequisites}
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : 'Save Prerequisites'}
               </button>
             </div>
           </div>

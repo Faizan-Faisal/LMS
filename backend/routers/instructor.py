@@ -5,7 +5,7 @@ from crud import instructor as crud
 import shutil
 import os
 
-router = APIRouter(prefix="/instructors", tags=["Instructors"])
+router = APIRouter(tags=["Instructors"])
 UPLOAD_DIR = "upload/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -74,9 +74,11 @@ def update_instructor(
     first_name: str = Form(...),
     last_name: str = Form(...),
     email: str = Form(...),
+    phone_number: str = Form(...),
     cnic: str = Form(...),
     department: str = Form(...),
     qualification: str = Form(...),
+    specialization: str = Form(...),
     year_of_experience: int = Form(...),
     picture: UploadFile = File(None),
     db: Session = Depends(get_db)
@@ -104,8 +106,6 @@ def update_instructor(
     if not updated:
         raise HTTPException(status_code=404, detail="Instructor not found")
     return updated
-
-
 
 # DELETE instructor
 @router.delete("/{instructor_id}")

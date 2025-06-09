@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import ManageInstructors from './ManageInstructors';
 import ManageStudents from './ManageStudents';
 import ManageSections from './ManageSections';
 import ManageSettings from './ManageSettings';
 import ManageCourses from './ManageCourses';
+// Import API functions
+import { getInstructors } from '../../api/instructorapi';
+import { getStudents } from '../../api/studentapi';
+import { getdepartments } from '../../api/departmentapi';
+import { getCourses } from '../../api/courseapi';
 
 const navItems = [
   { label: 'Dashboard', path: '/admin', icon: (
@@ -39,43 +44,78 @@ const navItems = [
   ) },
 ];
 
-const dashboardCards = [
-  {
-    label: 'Total Instructors',
-    value: 11,
-    icon: (
-      <svg className="h-10 w-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-    ),
-    color: 'bg-blue-50',
-  },
-  {
-    label: 'Total Students',
-    value: 0,
-    icon: (
-      <svg className="h-10 w-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 000 7.75" /></svg>
-    ),
-    color: 'bg-red-50',
-  },
-  {
-    label: 'Active Courses',
-    value: 4,
-    icon: (
-      <svg className="h-10 w-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0 0H3" /></svg>
-    ),
-    color: 'bg-green-50',
-  },
-  {
-    label: 'Total Departments',
-    value: 3,
-    icon: (
-      <svg className="h-10 w-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7h18M3 12h18M3 17h18" /></svg>
-    ),
-    color: 'bg-yellow-50',
-  },
-];
-
 const AdminPortal: React.FC = () => {
   const location = useLocation();
+  const [instructorCount, setInstructorCount] = useState(0);
+  const [studentCount, setStudentCount] = useState(0);
+  const [departmentCount, setDepartmentCount] = useState(0);
+  const [courseCount, setCourseCount] = useState(0);
+
+  // Fetch counts on component mount
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [instructorsRes, studentsRes, departmentsRes, coursesRes] = await Promise.all([
+          getInstructors(),
+          getStudents(),
+          getdepartments(),
+          getCourses(),
+        ]);
+
+        setInstructorCount(instructorsRes.data.length); // Assuming API returns an array
+        setStudentCount(studentsRes.data.length); // Assuming API returns an array
+        setDepartmentCount(departmentsRes.data.length); // Assuming API returns an array
+        setCourseCount(coursesRes.data.length); // Assuming API returns an array
+
+      } catch (err) {
+        console.error('Error fetching dashboard counts:', err);
+        // Optionally show a toast error here
+      }
+    };
+
+    fetchCounts();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  // Updated dashboardCards to use state and enhanced styling with gradients, borders, and centered content
+  const dashboardCards = [
+    {
+      label: 'Total Instructors',
+      value: instructorCount,
+      icon: (
+        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17.25a.75.75 0 00-.26-.615l-5.396-4.593A8.75 8.75 0 003 16.5V18h9v-.75a.75.75 0 00-.26-.615z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 11.25v-1.5a3.75 3.75 0 10-7.5 0v1.5m7.5 0L21 21m-3-9L18 21m-3 0l-3 0m0 0h-2.25m-1.5 0h-2.25m-1.5 0h-2.25M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+      ),
+      color: 'bg-gradient-to-br from-blue-400 to-blue-600',
+      textColor: 'text-white'
+    },
+    {
+      label: 'Total Students',
+      value: studentCount,
+      icon: (
+        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 000 7.75" /></svg>
+      ),
+      color: 'bg-gradient-to-br from-red-400 to-red-600',
+      textColor: 'text-white'
+    },
+    {
+      label: 'Total Courses',
+      value: courseCount,
+      icon: (
+        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.247m0-13C13.168 5.477 14.754 5 16.5 5S19.832 5.477 21 6.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.247" /></svg>
+      ),
+      color: 'bg-gradient-to-br from-green-400 to-green-600',
+      textColor: 'text-white'
+    },
+    {
+      label: 'Total Departments',
+      value: departmentCount,
+      icon: (
+        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+      ),
+      color: 'bg-gradient-to-br from-yellow-400 to-yellow-600',
+      textColor: 'text-white'
+    },
+  ];
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -114,10 +154,12 @@ const AdminPortal: React.FC = () => {
               {/* Dashboard Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {dashboardCards.map(card => (
-                  <div key={card.label} className={`rounded-xl shadow ${card.color} p-8 flex flex-col items-center transition hover:scale-105`}>
-                    {card.icon}
-                    <div className="mt-4 text-lg font-semibold text-slate-700">{card.label}</div>
-                    <div className="mt-2 text-3xl font-extrabold text-slate-900">{card.value}</div>
+                  <div key={card.label} className={`rounded-xl shadow ${card.color} border border-white p-8 flex flex-col items-center transition hover:scale-105`}>
+                    <div className={`h-12 w-12 mb-4 ${card.textColor}`}>
+                      {card.icon}
+                    </div>
+                    <div className="text-lg font-semibold text-white">{card.label}</div>
+                    <div className="mt-2 text-3xl font-extrabold text-white">{card.value}</div>
                   </div>
                 ))}
               </div>

@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import os
 
-from routers import instructor, student, course, department , section# Add these as you create them
+from routers import instructor, student, course, department , section , pre_course# Add these as you create them
 
 app = FastAPI(
     title="University LMS API",
@@ -45,6 +45,7 @@ app.include_router(department.router, prefix="/api/departments", tags=["Departme
 app.include_router(section.router, prefix="/api/sections", tags=["Sections"])
 app.include_router(student.router, prefix="/api/students", tags=["Students"])
 app.include_router(course.router, prefix="/api/courses", tags=["Courses"])
+app.include_router(pre_course.router, prefix="/api/course_prerequisites", tags=["Course Prerequisites"])
 
 if __name__ == "__main__":
     import uvicorn

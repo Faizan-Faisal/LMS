@@ -5,7 +5,7 @@ from crud import section as crud
 import shutil
 import os
 
-router = APIRouter(prefix="/sections", tags=["Sections"])
+router = APIRouter( tags=["Sections"])
 
 
 # CREATE section
@@ -54,10 +54,15 @@ def update_section(
     db: Session = Depends(get_db)
 ):
     updated_data = {
-        # "section_name": section_name,
         "department": department,
         "semester": semester,
     }
+
+    updated_section = crud.update_section(db, section_name, updated_data)
+
+    if not updated_section:
+        raise HTTPException(status_code=404, detail="Section not found or no changes made")
+    return updated_section
 
 # DELETE section
 @router.delete("/{section_name}")

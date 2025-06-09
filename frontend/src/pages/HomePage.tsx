@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+// import universityLogo from '../numl_logo.png';
+import universityLogo from '../numl_logo (2).png';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -35,12 +37,13 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-lmsblue-dark to-lmsblue py-12 px-4">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-wide whitespace-nowrap drop-shadow mb-2">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-lmsblue-dark to-lmsblue py-0 px-4">
+      <img src={universityLogo} alt="National University of Modern Languages Logo" className="mx-auto max-w-[350px] mb-2" />
+      <div className="text-center mb-0 mt-1">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-wide whitespace-nowrap drop-shadow mb-0">
           NATIONAL UNIVERSITY OF MODERN LANGUAGES
         </h1>
-        <h2 className="text-lg md:text-xl text-white/80 tracking-widest font-semibold">NUML LMS</h2>
+        <h2 className="text-lg md:text-xl text-white/80 tracking-widest font-semibold mb-0">NUML LMS</h2>
       </div>
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
         {loginOptions.map((option) => (

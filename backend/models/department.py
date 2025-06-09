@@ -5,7 +5,7 @@ from database import Base
 class Department(Base):
     __tablename__ = "departments"
 
-    department_name = Column(String(20), primary_key=True, index=True)
+    department_name = Column(String(255), primary_key=True, index=True)
 
     # Relationship: One department → Many instructors
     instructors = relationship("Instructor", back_populates="department_rel")

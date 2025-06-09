@@ -11,8 +11,8 @@ class Student(Base):
     email = Column(String(100), unique=True, nullable=False)
     phone_number = Column(String(100), unique=True, nullable=False)
     cnic = Column(String(25), unique=True, nullable=False)
-    program = Column(String(100),  ForeignKey("departments.department_name"))
-    section = Column(String(100),  ForeignKey("sections.section_name"))
+    program = Column(String(255),  ForeignKey("departments.department_name"))
+    section = Column(String(255),  ForeignKey("sections.section_name"))
     enrollment_year = Column(Integer, nullable=False)
     picture = Column(String(255))  # This stores image file name or path
 

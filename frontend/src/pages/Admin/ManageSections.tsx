@@ -148,9 +148,13 @@ const ManageSections: React.FC = () => {
         await addSection(formData); // Use actual API call
         toast.success('Section added successfully.');
       } else if (formType === 'edit' && selected) {
-        // Note: We are assuming section_name is the identifier and is not changed during edit.
-        // If section_name could change, you would need to handle that differently.
-        await updateSection(selected.section_name, formData); // Use actual API call
+        // For update, create FormData directly to match backend's Form parameters
+        const updateFormData = new FormData();
+        // Do NOT include section_name in FormData, as it's the URL identifier
+        updateFormData.append('department', formData.department);
+        updateFormData.append('semester', formData.semester);
+
+        await updateSection(selected.section_name, updateFormData); // Pass FormData
         toast.success('Section updated successfully.');
       }
 

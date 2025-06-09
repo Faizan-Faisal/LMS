@@ -5,7 +5,7 @@ from crud import department as crud
 import shutil
 import os
 
-router = APIRouter(prefix="/departments", tags=["Departments"])
+router = APIRouter( tags=["Departments"])
 
 
 # CREATE department

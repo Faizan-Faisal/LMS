@@ -5,7 +5,7 @@ from crud import course as crud
 import shutil
 import os
 
-router = APIRouter(prefix="/courses", tags=["Courses"])
+router = APIRouter( tags=["Courses"])
 
 
 # CREATE course
@@ -39,9 +39,17 @@ def search_course(keyword: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="course not found")
     return result
 
-# VIEW course by ID
-@router.get("/{course_name}")
-def get_course(course_name: str, db: Session = Depends(get_db)):
+# VIEW course by ID (renamed path for clarity)
+@router.get("/id/{course_id}") # <-- CHANGED THIS LINE
+def get_course_by_id_endpoint(course_id: str, db: Session = Depends(get_db)): # Renamed function for clarity
+    course = crud.get_course_by_id(db, course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="course id not found")
+    return course
+
+# VIEW course by name (renamed path for clarity)
+@router.get("/name/{course_name}") # <-- CHANGED THIS LINE
+def get_course_by_name_endpoint(course_name: str, db: Session = Depends(get_db)): # Renamed function for clarity
     course = crud.get_course_by_name(db, course_name)
     if not course:
         raise HTTPException(status_code=404, detail="course not found")
@@ -50,18 +58,23 @@ def get_course(course_name: str, db: Session = Depends(get_db)):
 # UPDATE course
 @router.put("/{course_name}")
 def update_course(
-    course_id: str,
     course_name: str,
+    course_id: str = Form(...),
     course_description: str = Form(...),
     course_credit_hours: int = Form(...),
     db: Session = Depends(get_db)
 ):
     updated_data = {
-        # "course_id": course_id,
+        "course_id": course_id,
         "course_name": course_name,
         "course_description": course_description,
         "course_credit_hours": course_credit_hours,
     }
+    
+    updated_course = crud.update_course(db, course_name, updated_data)
+    if not updated_course:
+        raise HTTPException(status_code=404, detail="Course not found or no changes made")
+    return updated_course
 
 # DELETE course
 @router.delete("/{course_id}")
@@ -70,3 +83,5 @@ def delete_course(course_id: str, db: Session = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="course not found")
     return {"message": "course deleted successfully"}
+
+
