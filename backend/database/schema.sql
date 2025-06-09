@@ -58,23 +58,8 @@ CREATE TABLE IF NOT EXISTS `students` (
     CONSTRAINT `fk_students_section` FOREIGN KEY (`section`) REFERENCES `sections`(`section_name`) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- 6. Create `course_offerings` table (depends on `courses`, `sections`, `instructors`)
-CREATE TABLE `course_offerings` (
-    `offering_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `course_id` VARCHAR(20) NOT NULL,
-    `section_name` VARCHAR(255) NOT NULL,
-    `instructor_id` VARCHAR(20) NOT NULL,
-    `capacity` INT NOT NULL DEFAULT 50, -- NEW COLUMN: To store the maximum number of students allowed for this offering
-    `schedule_time` VARCHAR(255) NULL,
-    CONSTRAINT `fk_offering_course` FOREIGN KEY (`course_id`) REFERENCES `courses`(`course_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT `fk_offering_section` FOREIGN KEY (`section_name`) REFERENCES `sections`(`section_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT `fk_offering_instructor` FOREIGN KEY (`instructor_id`) REFERENCES `instructors`(`instructor_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
 
-    UNIQUE (`course_id`, `section_name`)
-);
-
-
--- 7. Create the `course_prerequisites` table
+-- 6. Create the `course_prerequisites` table
 -- This table defines which courses are prerequisites for other courses.
 CREATE TABLE IF NOT EXISTS `course_prerequisites` (
     `prerequisite_id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,6 +73,21 @@ CREATE TABLE IF NOT EXISTS `course_prerequisites` (
     UNIQUE (`course_id`, `prereq_course_id`) 
 );
 
+
+-- 7. Create `course_offerings` table (depends on `courses`, `sections`, `instructors`)
+CREATE TABLE `course_offerings` (
+    `offering_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `course_id` VARCHAR(20) NOT NULL,
+    `section_name` VARCHAR(255) NOT NULL,
+    `instructor_id` VARCHAR(20) NOT NULL,
+    `capacity` INT NOT NULL DEFAULT 50, -- NEW COLUMN: To store the maximum number of students allowed for this offering
+    `schedule_time` VARCHAR(255) NULL,
+    CONSTRAINT `fk_offering_course` FOREIGN KEY (`course_id`) REFERENCES `courses`(`course_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT `fk_offering_section` FOREIGN KEY (`section_name`) REFERENCES `sections`(`section_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT `fk_offering_instructor` FOREIGN KEY (`instructor_id`) REFERENCES `instructors`(`instructor_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+
+    UNIQUE (`course_id`, `section_name`)
+);
 
 -- 8. Create `student_course_enrollments` table (depends on `students`, `course_offerings`)
 CREATE TABLE `student_course_enrollments` (

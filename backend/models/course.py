@@ -1,7 +1,10 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
- 
+# from models.course_offerings import Course_Offerings
+
+
+
 # Assuming your Course model is defined as discussed previously:
 class Course(Base):
     __tablename__ = "courses"
@@ -28,7 +31,6 @@ class Course(Base):
     )
 
     # Other relationships (like offerings) would also go here
-    # offerings = relationship("CourseOffering", back_populates="course_rel")
-
+    offerings = relationship("CourseOffering", back_populates="course_rel") 
     def __repr__(self):
         return f"<Course(course_id='{self.course_id}', course_name='{self.course_name}')>"

@@ -2,12 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { getdepartments } from '../../api/departmentapi'; // Import department API
 import { getSections, addSection, getSectionByName, updateSection, deleteSection } from '../../api/sectionapi'; // Import section API
+import { getCourses } from '../../api/courseapi';
+import { getInstructors } from '../../api/instructorapi';
+import { createCourseOffering, getCourseOfferingsBySectionDetails } from '../../api/course_offerings';
 
 // Define interface for a Section based on backend model
 interface Section {
   section_name: string; // Primary key
   department: string;
   semester: string;
+}
+
+interface Course {
+  course_id: string;
+  course_name: string;
+}
+
+interface Instructor {
+  instructor_id: string;
+  first_name: string;
+  last_name: string;
+}
+
+interface CourseOffering {
+  offering_id: number;
+  course_id: string;
+  section_name: string;
+  instructor_id: string;
+  capacity: number;
+}
+
+interface CourseOfferingDetails {
+    offering_id: number;
+    capacity: number;
+    course_name: string;
+    instructor_first_name: string;
+    instructor_last_name: string;
 }
 
 const ManageSections: React.FC = () => {
@@ -18,6 +48,7 @@ const ManageSections: React.FC = () => {
   const [formType, setFormType] = useState<'add' | 'edit'>('add');
   const [selected, setSelected] = useState<Section | null>(null);
   const [viewed, setViewed] = useState<Section | null>(null);
+  const [viewedCourseOfferingsDetails, setViewedCourseOfferingsDetails] = useState<CourseOfferingDetails[]>([]);
   const [formData, setFormData] = useState<any>({
     section_name: '',
     department: '',
@@ -26,6 +57,20 @@ const ManageSections: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<string | null>(null); // Use section_name for deletion
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<Section | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [courseOfferings, setCourseOfferings] = useState<CourseOfferingDetails[]>([]);
+  const [assignFormData, setAssignFormData] = useState({
+    course_id: '',
+    instructor_id: '',
+    capacity: 30
+  });
+  const [courseSearchTerm, setCourseSearchTerm] = useState('');
+  const [instructorSearchTerm, setInstructorSearchTerm] = useState('');
+  const [selectedCourseName, setSelectedCourseName] = useState<string | null>(null);
+  const [selectedInstructorName, setSelectedInstructorName] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSections();
@@ -53,6 +98,36 @@ const ManageSections: React.FC = () => {
       toast.error('Failed to fetch sections.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const res = await getCourses();
+      setCourses(res.data);
+    } catch (err) {
+      console.error('Error fetching courses:', err);
+      toast.error('Failed to load courses.');
+    }
+  };
+
+  const fetchInstructors = async () => {
+    try {
+      const res = await getInstructors();
+      setInstructors(res.data);
+    } catch (err) {
+      console.error('Error fetching instructors:', err);
+      toast.error('Failed to load instructors.');
+    }
+  };
+
+  const fetchCourseOfferings = async (sectionName: string) => {
+    try {
+      const res = await getCourseOfferingsBySectionDetails(sectionName);
+      setCourseOfferings(res.data);
+    } catch (err) {
+      console.error('Error fetching course offerings:', err);
+      toast.error('Failed to load course offerings.');
     }
   };
 
@@ -180,10 +255,94 @@ const ManageSections: React.FC = () => {
     fetchSections();
   };
 
-  const handleView = (sec: Section) => {
+  const handleView = async (sec: Section) => {
     setViewed(sec);
+    try {
+      const res = await getCourseOfferingsBySectionDetails(sec.section_name);
+      setViewedCourseOfferingsDetails(res.data);
+    } catch (err: any) {
+      console.error('Error fetching course offerings for view:', err);
+      // Only show toast if it's not a 404 (no offerings found)
+      if (err.response && err.response.status === 404) {
+        // Expected: no course offerings found, no toast needed
+      } else {
+        toast.error('Failed to load course offerings for this section.');
+      }
+      setViewedCourseOfferingsDetails([]); // Clear previous data on error/no findings
+    }
   };
-  const closeView = () => setViewed(null);
+  const closeView = () => {
+    setViewed(null);
+    setViewedCourseOfferingsDetails([]); // Clear data when closing
+  };
+
+  const handleAssignCourses = (section: Section) => {
+    setSelectedSection(section);
+    setShowAssignModal(true);
+    fetchCourses();
+    fetchInstructors();
+    fetchCourseOfferings(section.section_name);
+    // Reset search terms and selected names when opening the modal
+    setCourseSearchTerm('');
+    setInstructorSearchTerm('');
+    setSelectedCourseName(null);
+    setSelectedInstructorName(null);
+    setAssignFormData(prev => ({ ...prev, course_id: '', instructor_id: '' }));
+  };
+
+  const handleAssignFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setAssignFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAssignSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedSection) return;
+
+    try {
+      await createCourseOffering(
+        assignFormData.course_id,
+        selectedSection.section_name,
+        assignFormData.instructor_id,
+        Number(assignFormData.capacity)
+      );
+      toast.success('Course assigned successfully');
+      fetchCourseOfferings(selectedSection.section_name);
+      setAssignFormData({
+        course_id: '',
+        instructor_id: '',
+        capacity: 30
+      });
+      setSelectedCourseName(null);
+      setSelectedInstructorName(null);
+    } catch (err) {
+      console.error('Error assigning course:', err);
+      toast.error('Failed to assign course');
+    }
+  };
+
+  const handleCourseSelect = (course: Course) => {
+    setAssignFormData(prev => ({ ...prev, course_id: course.course_id }));
+    setSelectedCourseName(course.course_name);
+    setCourseSearchTerm(''); // Clear search term to hide suggestions
+  };
+
+  const handleInstructorSelect = (instructor: Instructor) => {
+    setAssignFormData(prev => ({ ...prev, instructor_id: instructor.instructor_id }));
+    setSelectedInstructorName(`${instructor.first_name} ${instructor.last_name}`);
+    setInstructorSearchTerm(''); // Clear search term to hide suggestions
+  };
+
+  const filteredCoursesOptions = courses.filter(course =>
+    course.course_name.toLowerCase().includes(courseSearchTerm.toLowerCase()) ||
+    course.course_id.toLowerCase().includes(courseSearchTerm.toLowerCase())
+  );
+
+  const filteredInstructorsOptions = instructors.filter(instructor =>
+    instructor.first_name.toLowerCase().includes(instructorSearchTerm.toLowerCase()) ||
+    instructor.last_name.toLowerCase().includes(instructorSearchTerm.toLowerCase()) ||
+    instructor.instructor_id.toLowerCase().includes(instructorSearchTerm.toLowerCase())
+  );
 
   return (
     <div className="bg-gray-100 min-h-screen w-full">
@@ -317,6 +476,12 @@ const ManageSections: React.FC = () => {
                         >
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>
                         </button>
+                        <button
+                          onClick={() => handleAssignCourses(sec)}
+                          className="px-3 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md shadow-sm ml-2"
+                        >
+                          Assign Courses
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -328,15 +493,31 @@ const ManageSections: React.FC = () => {
       </div>
       {/* Modal for View Section */}
       {viewed && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl p-8 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-6">Section Details</h3>
+            <h3 className="text-xl font-bold mb-6">Section Details: {viewed.section_name}</h3>
             <div className="space-y-2 mb-6">
               <div><span className="font-semibold">Section Name:</span> {viewed.section_name}</div>
               <div><span className="font-semibold">Department:</span> {viewed.department}</div>
               <div><span className="font-semibold">Semester:</span> {viewed.semester}</div>
             </div>
-            <div className="flex justify-end">
+
+            <h4 className="text-lg font-bold mb-4">Assigned Courses</h4>
+            {viewedCourseOfferingsDetails.length === 0 ? (
+                <p className="text-gray-500">No courses assigned to this section yet.</p>
+            ) : (
+                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    {viewedCourseOfferingsDetails.map((offering) => (
+                        <div key={offering.offering_id} className="p-3 border rounded-lg bg-gray-50">
+                            <p><span className="font-semibold">Course:</span> {offering.course_name}</p>
+                            <p><span className="font-semibold">Instructor:</span> {offering.instructor_first_name} {offering.instructor_last_name}</p>
+                            <p><span className="font-semibold">Capacity:</span> {offering.capacity}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className="flex justify-end mt-6">
               <button onClick={closeView} className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">Close</button>
             </div>
           </div>
@@ -364,6 +545,124 @@ const ManageSections: React.FC = () => {
                 {loading ? 'Deleting...' : 'Delete'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {showAssignModal && selectedSection && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h3 className="text-xl font-bold mb-4">
+              Assign Courses to {selectedSection.section_name}
+            </h3>
+            
+            {/* Current Assignments */}
+            <div className="mb-6">
+              <h4 className="font-semibold mb-2">Current Assignments</h4>
+              <div className="max-h-40 overflow-y-auto">
+                {courseOfferings.map(offering => (
+                  <div key={offering.offering_id} className="flex justify-between items-center p-2 bg-gray-50 rounded mb-2">
+                    <span>{offering.course_name}</span>
+                    <span>{offering.instructor_first_name} {offering.instructor_last_name}</span>
+                    <span>Capacity: {offering.capacity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Assignment Form */}
+            <form onSubmit={handleAssignSubmit} className="space-y-4">
+              <div className="relative">
+                <label htmlFor="course-search" className="block text-sm font-medium text-gray-700">Search Course</label>
+                <input
+                  type="text"
+                  id="course-search"
+                  placeholder="Search by Course Name or ID"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={courseSearchTerm}
+                  onChange={(e) => setCourseSearchTerm(e.target.value)}
+                />
+                {courseSearchTerm && filteredCoursesOptions.length > 0 && (
+                  <div className="absolute z-10 bg-white border border-gray-300 w-full rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                    {filteredCoursesOptions.map(course => (
+                      <div
+                        key={course.course_id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleCourseSelect(course)}
+                      >
+                        {course.course_name} ({course.course_id})
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {selectedCourseName && !courseSearchTerm && (
+                    <p className="text-sm text-gray-600 mt-1">Selected Course: <span className="font-semibold">{selectedCourseName}</span></p>
+                )}
+                 {!assignFormData.course_id && !selectedCourseName && (
+                    <p className="text-sm text-red-500 mt-1">Please select a course</p>
+                )}
+              </div>
+
+              <div className="relative">
+                <label htmlFor="instructor-search" className="block text-sm font-medium text-gray-700">Search Instructor</label>
+                <input
+                  type="text"
+                  id="instructor-search"
+                  placeholder="Search by Name or ID"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={instructorSearchTerm}
+                  onChange={(e) => setInstructorSearchTerm(e.target.value)}
+                />
+                {instructorSearchTerm && filteredInstructorsOptions.length > 0 && (
+                  <div className="absolute z-10 bg-white border border-gray-300 w-full rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                    {filteredInstructorsOptions.map(instructor => (
+                      <div
+                        key={instructor.instructor_id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleInstructorSelect(instructor)}
+                      >
+                        {instructor.first_name} {instructor.last_name} ({instructor.instructor_id})
+                      </div>
+                    ))
+                  }
+                  </div>
+                )}
+                {selectedInstructorName && !instructorSearchTerm && (
+                    <p className="text-sm text-gray-600 mt-1">Selected Instructor: <span className="font-semibold">{selectedInstructorName}</span></p>
+                )}
+                {!assignFormData.instructor_id && !selectedInstructorName && (
+                    <p className="text-sm text-red-500 mt-1">Please select an instructor</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Capacity</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  value={assignFormData.capacity}
+                  onChange={handleAssignFormChange}
+                  min="1"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAssignModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                >
+                  Assign Course
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

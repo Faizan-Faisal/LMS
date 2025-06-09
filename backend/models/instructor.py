@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+# from models.course_offerings import CourseOffering
 
 class Instructor(Base):
     __tablename__ = "instructors"
@@ -22,5 +23,6 @@ class Instructor(Base):
 
     # Relationship to Department
     department_rel = relationship("Department", back_populates="instructors")
-    # offerings = relationship("CourseOffering", back_populates="instructor_rel")
+    # offerings = relationship(lambda: CourseOffering, back_populates="instructor_rel")
 
+    offerings = relationship("CourseOffering", back_populates="instructor_rel")

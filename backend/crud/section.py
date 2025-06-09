@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models.section import Section
+from models.course_offerings import CourseOffering  # Import CourseOffering model
 
 # CREATE section
 def create_section(db: Session, section_data: dict):
@@ -38,6 +39,8 @@ def update_section(db: Session, section_name: str, updated_data: dict):
 def delete_section(db: Session, section_name: str):
     section = db.query(Section).filter(Section.section_name == section_name).first()
     if section:
+        # Delete all course offerings associated with this section first
+        db.query(CourseOffering).filter(CourseOffering.section_name == section_name).delete()
         db.delete(section)
         db.commit()
         return True
