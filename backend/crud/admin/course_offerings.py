@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from models.course_offerings import CourseOffering
-from models.course import Course # Import Course model for joins
-from models.instructor import Instructor # Import Instructor model for joins
+from models.admin.course_offerings import CourseOffering
+from models.admin.course import Course # Import Course model for joins
+from models.admin.instructor import Instructor # Import Instructor model for joins
 
 
 def create_course_offering(db: Session, course_id: str, section_name: str, instructor_id: str, capacity: int):

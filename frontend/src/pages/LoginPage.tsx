@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { loginInstructor } from '../api/instructorAuthApi';
+import { loginStudent } from '../api/studentAuthApi';
+import { toast } from 'react-toastify';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -12,21 +15,45 @@ const LoginPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const userType = params.get('type') || params.get('role') || 'student';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     if (!username || !password) {
       setError('Please fill in all fields');
       return;
     }
-    switch (userType) {
-      case 'admin':
-        navigate('/admin');
-        break;
-      case 'instructor':
-        navigate('/instructor');
-        break;
-      default:
-        navigate('/student');
+
+    try {
+      switch (userType) {
+        case 'admin':
+          navigate('/admin');
+          break;
+        case 'instructor':
+          const instructorData = await loginInstructor(username, password);
+          console.log('Instructor login successful:', instructorData);
+          toast.success('Login successful!');
+          localStorage.setItem('instructorToken', instructorData.access_token);
+          navigate('/instructor');
+          break;
+        case 'student':
+          const studentData = await loginStudent(username, password);
+          console.log('Student login successful:', studentData);
+          toast.success('Login successful!');
+          localStorage.setItem('studentToken', studentData.access_token);
+          navigate('/student');
+          break;
+        default:
+          navigate('/');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred during login.');
+      }
+      toast.error(error);
     }
   };
 

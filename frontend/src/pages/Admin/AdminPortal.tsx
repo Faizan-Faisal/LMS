@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { FaUsers, FaUserGraduate, FaBook, FaBars, FaHome, FaChalkboardTeacher, FaBuilding, FaClipboardList, FaBullhorn, FaChartBar, FaCog, FaSignOutAlt } from 'react-icons/fa';
 import ManageInstructors from './ManageInstructors';
 import ManageStudents from './ManageStudents';
 import ManageSections from './ManageSections';
@@ -14,36 +15,16 @@ import { getdepartments } from '../../api/departmentapi';
 import { getCourses } from '../../api/courseapi';
 
 const navItems = [
-  { label: 'Dashboard', path: '/admin', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" /></svg>
-  ) },
-  { label: 'Manage Instructors', path: '/admin/instructors', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-  ) },
-  { label: 'Manage Students', path: '/admin/students', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 000 7.75" /></svg>
-  ) },
-  { label: 'Manage Departments', path: '/admin/departments', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7h18M3 12h18M3 17h18" /></svg>
-  ) },
-  { label: 'Manage Courses', path: '/admin/courses', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0 0H3" /></svg>
-  ) },
-  { label: 'Manage Sections', path: '/admin/sections', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-  ) },
-  { label: 'Announcements', path: '/admin/announcements', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 13V7a2 2 0 00-2-2H7a2 2 0 00-2 2v6m14 0a2 2 0 01-2 2H7a2 2 0 01-2-2m14 0V7a2 2 0 00-2-2H7a2 2 0 00-2 2v6m14 0v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6" /></svg>
-  ) },
-  { label: 'Reports', path: '#', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-6 4h6a2 2 0 002-2v-5a2 2 0 00-2-2h-2a2 2 0 00-2 2v5a2 2 0 002 2z" /></svg>
-  ) },
-  { label: 'Settings', path: '/admin/settings', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19a7 7 0 100-14 7 7 0 000 14z" /></svg>
-  ) },
-  { label: 'Logout', path: '#', icon: (
-    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12a9 9 0 1118 0 9 9 0 01-18 0z" /></svg>
-  ) },
+  { label: 'Dashboard', path: '/admin', icon: (<FaHome className="h-5 w-5 mr-2" />) },
+  { label: 'Manage Instructors', path: '/admin/instructors', icon: (<FaChalkboardTeacher className="h-5 w-5 mr-2" />) },
+  { label: 'Manage Students', path: '/admin/students', icon: (<FaUserGraduate className="h-5 w-5 mr-2" />) },
+  { label: 'Manage Departments', path: '/admin/departments', icon: (<FaBuilding className="h-5 w-5 mr-2" />) },
+  { label: 'Manage Courses', path: '/admin/courses', icon: (<FaBook className="h-5 w-5 mr-2" />) },
+  { label: 'Manage Sections', path: '/admin/sections', icon: (<FaClipboardList className="h-5 w-5 mr-2" />) },
+  { label: 'Announcements', path: '/admin/announcements', icon: (<FaBullhorn className="h-5 w-5 mr-2" />) },
+  { label: 'Reports', path: '#', icon: (<FaChartBar className="h-5 w-5 mr-2" />) },
+  { label: 'Settings', path: '/admin/settings', icon: (<FaCog className="h-5 w-5 mr-2" />) },
+  { label: 'Logout', path: '#', icon: (<FaSignOutAlt className="h-5 w-5 mr-2" />) },
 ];
 
 const AdminPortal: React.FC = () => {
@@ -84,37 +65,37 @@ const AdminPortal: React.FC = () => {
       label: 'Total Instructors',
       value: instructorCount,
       icon: (
-        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17.25a.75.75 0 00-.26-.615l-5.396-4.593A8.75 8.75 0 003 16.5V18h9v-.75a.75.75 0 00-.26-.615z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 11.25v-1.5a3.75 3.75 0 10-7.5 0v1.5m7.5 0L21 21m-3-9L18 21m-3 0l-3 0m0 0h-2.25m-1.5 0h-2.25m-1.5 0h-2.25M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        <FaUsers className="h-12 w-12" />
       ),
-      color: 'bg-gradient-to-br from-blue-400 to-blue-600',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-blue-200 to-blue-400',
+      textColor: 'text-gray-800'
     },
     {
       label: 'Total Students',
       value: studentCount,
       icon: (
-        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 000 7.75" /></svg>
+        <FaUserGraduate className="h-12 w-12" />
       ),
-      color: 'bg-gradient-to-br from-red-400 to-red-600',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-red-200 to-red-400',
+      textColor: 'text-gray-800'
     },
     {
       label: 'Total Courses',
       value: courseCount,
       icon: (
-        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.247m0-13C13.168 5.477 14.754 5 16.5 5S19.832 5.477 21 6.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.247" /></svg>
+        <FaBook className="h-12 w-12" />
       ),
-      color: 'bg-gradient-to-br from-green-400 to-green-600',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-green-200 to-green-400',
+      textColor: 'text-gray-800'
     },
     {
       label: 'Total Departments',
       value: departmentCount,
       icon: (
-        <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+        <FaBars className="h-12 w-12" />
       ),
-      color: 'bg-gradient-to-br from-yellow-400 to-yellow-600',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-purple-200 to-purple-400',
+      textColor: 'text-gray-800'
     },
   ];
 
@@ -160,8 +141,8 @@ const AdminPortal: React.FC = () => {
                     <div className={`h-12 w-12 mb-4 ${card.textColor}`}>
                       {card.icon}
                     </div>
-                    <div className="text-lg font-semibold text-white">{card.label}</div>
-                    <div className="mt-2 text-3xl font-extrabold text-white">{card.value}</div>
+                    <div className="text-lg font-semibold ${card.textColor}">{card.label}</div>
+                    <div className="mt-2 text-3xl font-extrabold ${card.textColor}">{card.value}</div>
                   </div>
                 ))}
               </div>

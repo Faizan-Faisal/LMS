@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.instructor import Instructor
+from models.admin.instructor import Instructor
 
 # CREATE instructor
 def create_instructor(db: Session, instructor_data: dict):

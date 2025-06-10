@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.student import Student
+from models.admin.student import Student
 
 # CREATE student
 def create_student(db: Session, student_data: dict):

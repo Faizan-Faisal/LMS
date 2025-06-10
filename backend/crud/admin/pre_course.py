@@ -2,8 +2,8 @@
 
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from models.pre_course import CoursePrerequisite # Your model
-from models.course import Course # You'll need this to validate course_ids later, and for joins
+from models.admin.pre_course import CoursePrerequisite # Your model
+from models.admin.course import Course # You'll need this to validate course_ids later, and for joins
 
 # --- Create Operations ---
 def create_prerequisite_link(db: Session, course_id: str, prereq_course_id: str):

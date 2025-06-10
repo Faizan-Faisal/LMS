@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
-from models.announcements import Announcement
 from datetime import date
-from models.department import Department  # Import Department model
+from models.admin.announcements import Announcement
+from models.admin.department import Department  # Import Department model
 
 # Helper to convert string date to date object
 def _convert_date_string_to_date(date_str: str | None) -> date | None:

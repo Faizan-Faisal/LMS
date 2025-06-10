@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-from crud import instructor as crud
+from crud.admin  import instructor as crud
 import shutil
 import os
 

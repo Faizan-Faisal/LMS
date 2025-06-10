@@ -5,7 +5,9 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 
-from routers import instructor, student, course, department , section , pre_course, course_offerings, announcements # Add announcements router
+from routers.admin import instructor, student, course, department , section , pre_course, course_offerings, announcements
+from routers.instructor import instructor_auth_router # Import the new instructor_auth_router
+from routers.student import student_auth_router # Import the new student_auth_router
 
 app = FastAPI(
     title="University LMS API",
@@ -42,9 +44,11 @@ async def health_check():
 
 # Include routers
 app.include_router(instructor.router, prefix="/api/instructors", tags=["Instructors"])
+app.include_router(instructor_auth_router.router, prefix="/api/instructor", tags=["Instructor Auth"]) # Include the new instructor auth router
+app.include_router(student.router, prefix="/api/students", tags=["Students"])
+app.include_router(student_auth_router.router, prefix="/api/student", tags=["Student Auth"]) # Include the new student auth router
 app.include_router(department.router, prefix="/api/departments", tags=["Departments"])
 app.include_router(section.router, prefix="/api/sections", tags=["Sections"])
-app.include_router(student.router, prefix="/api/students", tags=["Students"])
 app.include_router(course.router, prefix="/api/courses", tags=["Courses"])
 app.include_router(pre_course.router, prefix="/api/course_prerequisites", tags=["Course Prerequisites"])
 app.include_router(course_offerings.router, prefix="/api/course_offerings", tags=["Course Offerings"])

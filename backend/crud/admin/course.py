@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models.course import Course
-from models.pre_course import CoursePrerequisite
+from models.admin.course import Course
+from models.admin.pre_course import CoursePrerequisite
 
 # CREATE course
 def create_course(db: Session, course_data: dict):

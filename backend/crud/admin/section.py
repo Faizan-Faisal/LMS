@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models.section import Section
-from models.course_offerings import CourseOffering  # Import CourseOffering model
+from models.admin.section import Section
+from models.admin.course_offerings import CourseOffering  # Import CourseOffering model
 
 # CREATE section
 def create_section(db: Session, section_data: dict):

@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Form, status
 from sqlalchemy.orm import Session
 from database import get_db
 from pydantic import BaseModel
-from crud import course_offerings as crud_offering
-from crud import course as crud_course
-from crud import instructor as crud_instructor
-from crud import section as crud_section  # if exists
+from crud.admin  import course_offerings as crud_offering
+from crud.admin  import course as crud_course
+from crud.admin  import instructor as crud_instructor
+from crud.admin  import section as crud_section  # if exists
 
 router = APIRouter( tags=["Course Offerings"])
 

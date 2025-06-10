@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date, datetime
 
-from crud import announcements as crud_announcement
-from models.announcements import Announcement as AnnouncementModel # Alias to avoid name conflict
+from crud.admin import announcements as crud_announcement
+from models.admin.announcements import Announcement as AnnouncementModel # Alias to avoid name conflict
 
 router = APIRouter(tags=["Announcements"])
 

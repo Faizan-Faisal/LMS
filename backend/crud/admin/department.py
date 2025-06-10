@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.department import Department
+from models.admin.department import Department
 
 # CREATE department
 def create_department(db: Session, department_data: dict):

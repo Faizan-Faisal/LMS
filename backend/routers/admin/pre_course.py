@@ -3,8 +3,8 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
-from crud import pre_course as crud_prereq # Your new CRUD file
-from crud import course as crud_course # Assuming you have a separate CRUD for main Courses
+from crud.admin  import pre_course as crud_prereq # Your new CRUD file
+from crud.admin  import course as crud_course # Assuming you have a separate CRUD for main Courses
 
 from pydantic import BaseModel
 
