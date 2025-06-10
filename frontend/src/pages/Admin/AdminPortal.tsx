@@ -5,6 +5,8 @@ import ManageStudents from './ManageStudents';
 import ManageSections from './ManageSections';
 import ManageSettings from './ManageSettings';
 import ManageCourses from './ManageCourses';
+import ManageDepartments from './ManageDepartments';
+import ManageAnnouncements from './ManageAnnouncements';
 // Import API functions
 import { getInstructors } from '../../api/instructorapi';
 import { getStudents } from '../../api/studentapi';
@@ -30,7 +32,7 @@ const navItems = [
   { label: 'Manage Sections', path: '/admin/sections', icon: (
     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
   ) },
-  { label: 'Announcements', path: '#', icon: (
+  { label: 'Announcements', path: '/admin/announcements', icon: (
     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 13V7a2 2 0 00-2-2H7a2 2 0 00-2 2v6m14 0a2 2 0 01-2 2H7a2 2 0 01-2-2m14 0V7a2 2 0 00-2-2H7a2 2 0 00-2 2v6m14 0v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6" /></svg>
   ) },
   { label: 'Reports', path: '#', icon: (
@@ -167,9 +169,11 @@ const AdminPortal: React.FC = () => {
           } />
           <Route path="instructors" element={<ManageInstructors />} />
           <Route path="students" element={<ManageStudents />} />
+          <Route path="departments" element={<ManageDepartments />} />
           <Route path="courses" element={<ManageCourses />} />
           <Route path="sections" element={<ManageSections />} />
           <Route path="settings" element={<ManageSettings />} />
+          <Route path="announcements" element={<ManageAnnouncements />} />
         </Routes>
       </main>
     </div>

@@ -11,3 +11,6 @@ class Department(Base):
     instructors = relationship("Instructor", back_populates="department_rel")
     sections = relationship("Section", back_populates="department_rel")
     students = relationship("Student", back_populates="department_rel")
+    announcements = relationship("Announcement", back_populates="department")
+
+     
