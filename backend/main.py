@@ -5,9 +5,12 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 
-from routers.admin import instructor, student, course, department , section , pre_course, course_offerings, announcements
+from routers.admin import instructor, student, course, department , section , pre_course, course_offerings
+from routers.shared import announcements
 from routers.instructor import instructor_auth_router # Import the new instructor_auth_router
 from routers.student import student_auth_router # Import the new student_auth_router
+from routers.admin import admin_auth_router # Import the new admin_auth_router
+from routers.instructor import instructor_course_router # Import the new instructor course router
 
 app = FastAPI(
     title="University LMS API",
@@ -53,6 +56,8 @@ app.include_router(course.router, prefix="/api/courses", tags=["Courses"])
 app.include_router(pre_course.router, prefix="/api/course_prerequisites", tags=["Course Prerequisites"])
 app.include_router(course_offerings.router, prefix="/api/course_offerings", tags=["Course Offerings"])
 app.include_router(announcements.router, prefix="/api/announcements", tags=["Announcements"]) # Include the new announcements router
+app.include_router(admin_auth_router.router) # Include the new admin auth router
+app.include_router(instructor_course_router.router, prefix="/api", tags=["Instructor Courses"]) # Include the new instructor course router
 
 if __name__ == "__main__":
     import uvicorn

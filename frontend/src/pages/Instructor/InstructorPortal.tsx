@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaBook, FaClipboardList, FaChartLine, FaHome, FaBullhorn, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { 
+    FaHome, 
+    FaBullhorn, 
+    FaGraduationCap, 
+    FaSignOutAlt,
+    FaBook,
+    FaClipboardList,
+    FaChartLine,
+    FaUserCircle
+} from 'react-icons/fa';
+import type { IconBaseProps } from 'react-icons';
 import { getInstructorById } from '../../api/instructorapi'; // Import the API function
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
+import ManageAnnouncements from './ManageAnnouncements';
+import CourseManagement from './CourseManagement'; // Import the new CourseManagement component
+import Icon from '../../components/Icon';
 
 interface InstructorProfile {
     instructor_id: string;
@@ -19,10 +32,65 @@ interface InstructorProfile {
     picture: string | null;
 }
 
-const navItems = [
-    { label: 'Dashboard', path: '/instructor', icon: (<FaHome className="h-5 w-5 mr-2" />) },
-    { label: 'Announcements', path: '/instructor/announcements', icon: (<FaBullhorn className="h-5 w-5 mr-2" />) },
-    { label: 'Logout', path: '#', icon: (<FaSignOutAlt className="h-5 w-5 mr-2" />) },
+interface NavItem {
+    label: string;
+    path: string;
+    icon: any; // Using any type temporarily to fix the issue
+}
+
+interface DashboardCard {
+    label: string;
+    description: string;
+    icon: any; // Using any type temporarily to fix the issue
+    color: string;
+    textColor: string;
+}
+
+const navItems: NavItem[] = [
+    { 
+        label: 'Dashboard', 
+        path: '/instructor', 
+        icon: FaHome
+    },
+    { 
+        label: 'Announcements', 
+        path: '/instructor/announcements', 
+        icon: FaBullhorn
+    },
+    { 
+        label: 'Course Management', 
+        path: '/instructor/courses', 
+        icon: FaGraduationCap
+    },
+    { 
+        label: 'Logout', 
+        path: '#', 
+        icon: FaSignOutAlt
+    },
+];
+
+const dashboardCards: DashboardCard[] = [
+    {
+        label: 'My Courses',
+        description: 'View and access your enrolled courses',
+        icon: FaBook,
+        color: 'bg-gradient-to-br from-blue-200 to-blue-400',
+        textColor: 'text-gray-800'
+    },
+    {
+        label: 'Assignments',
+        description: 'Track and submit your assignments',
+        icon: FaClipboardList,
+        color: 'bg-gradient-to-br from-green-200 to-green-400',
+        textColor: 'text-gray-800'
+    },
+    {
+        label: 'Student Progress',
+        description: 'Monitor student performance and grades',
+        icon: FaChartLine,
+        color: 'bg-gradient-to-br from-purple-200 to-purple-400',
+        textColor: 'text-gray-800'
+    },
 ];
 
 const InstructorPortal: React.FC = () => {
@@ -64,30 +132,6 @@ const InstructorPortal: React.FC = () => {
         navigate('/login?role=instructor');
     };
 
-    const dashboardCards = [
-        {
-            label: 'My Courses',
-            description: 'View and access your enrolled courses',
-            icon: (<FaBook className="h-12 w-12" />),
-            color: 'bg-gradient-to-br from-blue-200 to-blue-400',
-            textColor: 'text-gray-800'
-        },
-        {
-            label: 'Assignments',
-            description: 'Track and submit your assignments',
-            icon: (<FaClipboardList className="h-12 w-12" />),
-            color: 'bg-gradient-to-br from-green-200 to-green-400',
-            textColor: 'text-gray-800'
-        },
-        {
-            label: 'Student Progress',
-            description: 'Monitor student performance and grades',
-            icon: (<FaChartLine className="h-12 w-12" />),
-            color: 'bg-gradient-to-br from-purple-200 to-purple-400',
-            textColor: 'text-gray-800'
-        },
-    ];
-
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
@@ -95,25 +139,24 @@ const InstructorPortal: React.FC = () => {
                 <div className="text-2xl font-extrabold mb-8 tracking-wide">LMS Instructor</div>
                 <nav className="flex-1">
                     <ul className="space-y-2">
-                        {navItems.map((item) => (
-                            <li key={item.label}>
-                                <Link
-                                    to={item.path === '#' ? location.pathname : item.path}
-                                    onClick={(e) => {
-                                        if (item.label === 'Logout') {
-                                            e.preventDefault(); // Prevent default Link navigation
-                                            handleLogout();
-                                        }
-                                    }}
-                                    className={`flex items-center px-4 py-3 rounded-lg hover:bg-slate-700 transition font-medium ${
-                                        location.pathname === item.path ? 'bg-slate-700' : ''
-                                    }`}
-                                >
-                                    {item.icon}
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))}
+                        {navItems.map((item) => {
+                            const IconComponent = item.icon;
+                            return (
+                                <li key={item.path}>
+                                    <Link
+                                        to={item.path}
+                                        className={`flex items-center px-4 py-2 text-sm font-medium rounded-md ${
+                                            location.pathname === item.path
+                                                ? 'bg-gray-100 text-gray-900'
+                                                : 'text-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        <IconComponent className="h-5 w-5 mr-2" />
+                                        {item.label}
+                                    </Link>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </nav>
             </aside>
@@ -135,7 +178,7 @@ const InstructorPortal: React.FC = () => {
                                     {instructorProfile?.picture ? (
                                         <img src={`http://localhost:8000/upload/${instructorProfile.picture}`} alt="Instructor" className="w-28 h-28 object-cover rounded-full mr-6 shadow-md" />
                                     ) : (
-                                        <FaUserCircle className="w-28 h-28 text-gray-400 mr-6" />
+                                        <Icon icon={FaUserCircle} className="w-28 h-28 text-gray-400 mr-6" />
                                     )}
                                     <div>
                                         <h2 className="text-3xl font-bold text-gray-800">{instructorProfile?.first_name} {instructorProfile?.last_name}</h2>
@@ -205,8 +248,8 @@ const InstructorPortal: React.FC = () => {
                             )}
                         </div>
                     } />
-                    {/* Placeholder for Announcements component */}
-                    <Route path="announcements" element={<div className="bg-white rounded-xl shadow p-6">Instructor Announcements Page (To be implemented)</div>} />
+                    <Route path="announcements" element={<ManageAnnouncements />} />
+                    <Route path="courses" element={<CourseManagement />} />
                 </Routes>
             </main>
         </div>

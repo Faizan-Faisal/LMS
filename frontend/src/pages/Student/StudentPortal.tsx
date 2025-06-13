@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaBullhorn, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
-import { getStudentById } from '../../api/studentapi';
+import { 
+    FaHome, 
+    FaBook, 
+    FaClipboardList, 
+    FaBullhorn, 
+    FaSignOutAlt,
+    FaUserCircle
+} from 'react-icons/fa';
+import type { IconBaseProps } from 'react-icons';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
+import { getStudentById } from '../../api/studentapi';
+import Icon from '../../components/Icon';
 
 interface StudentProfile {
     student_id: string;
@@ -18,10 +27,28 @@ interface StudentProfile {
     picture: string | null;
 }
 
-const navItems = [
-    { label: 'Dashboard', path: '/student', icon: (<FaHome className="h-5 w-5 mr-2" />) },
-    { label: 'Announcements', path: '/student/announcements', icon: (<FaBullhorn className="h-5 w-5 mr-2" />) },
-    { label: 'Logout', path: '#', icon: (<FaSignOutAlt className="h-5 w-5 mr-2" />) },
+interface NavItem {
+    label: string;
+    path: string;
+    icon: any; // Using any type temporarily to fix the issue
+}
+
+const navItems: NavItem[] = [
+    { 
+        label: 'Dashboard', 
+        path: '/student', 
+        icon: FaHome
+    },
+    { 
+        label: 'Announcements', 
+        path: '/student/announcements', 
+        icon: FaBullhorn
+    },
+    { 
+        label: 'Logout', 
+        path: '#', 
+        icon: FaSignOutAlt
+    },
 ];
 
 const StudentPortal: React.FC = () => {
@@ -70,25 +97,24 @@ const StudentPortal: React.FC = () => {
                 <div className="text-2xl font-extrabold mb-8 tracking-wide">LMS Student</div>
                 <nav className="flex-1">
                     <ul className="space-y-2">
-                        {navItems.map((item) => (
-                            <li key={item.label}>
-                                <Link
-                                    to={item.path === '#' ? location.pathname : item.path}
-                                    onClick={(e) => {
-                                        if (item.label === 'Logout') {
-                                            e.preventDefault();
-                                            handleLogout();
-                                        }
-                                    }}
-                                    className={`flex items-center px-4 py-3 rounded-lg hover:bg-slate-700 transition font-medium ${
-                                        location.pathname === item.path ? 'bg-slate-700' : ''
-                                    }`}
-                                >
-                                    {item.icon}
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))}
+                        {navItems.map((item) => {
+                            const IconComponent = item.icon;
+                            return (
+                                <li key={item.path}>
+                                    <Link
+                                        to={item.path}
+                                        className={`flex items-center px-4 py-2 text-sm font-medium rounded-md ${
+                                            location.pathname === item.path
+                                                ? 'bg-gray-100 text-gray-900'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        <IconComponent className="h-5 w-5 mr-2" />
+                                        {item.label}
+                                    </Link>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </nav>
             </aside>
@@ -111,7 +137,7 @@ const StudentPortal: React.FC = () => {
                                     {studentProfile?.picture ? (
                                         <img src={`http://localhost:8000/upload/${studentProfile.picture}`} alt="Student" className="w-28 h-28 object-cover rounded-full mr-6 shadow-md" />
                                     ) : (
-                                        <FaUserCircle className="w-28 h-28 text-gray-400 mr-6" />
+                                        <Icon icon={FaUserCircle} className="w-28 h-28 text-gray-400 mr-6" />
                                     )}
                                     <div>
                                         <h2 className="text-3xl font-bold text-gray-800">{studentProfile?.first_name} {studentProfile?.last_name}</h2>
@@ -149,7 +175,6 @@ const StudentPortal: React.FC = () => {
                             </div>
                         </>
                     } />
-                    {/* Placeholder for Announcements component */}
                     <Route path="announcements" element={<div className="bg-white rounded-xl shadow p-6">Student Announcements Page (To be implemented)</div>} />
                 </Routes>
             </main>

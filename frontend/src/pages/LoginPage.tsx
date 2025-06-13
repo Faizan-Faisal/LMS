@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { loginInstructor } from '../api/instructorAuthApi';
 import { loginStudent } from '../api/studentAuthApi';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -27,6 +28,10 @@ const LoginPage: React.FC = () => {
     try {
       switch (userType) {
         case 'admin':
+          toast.success('Login successful!');
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('instructorToken');
+          localStorage.removeItem('studentToken');
           navigate('/admin');
           break;
         case 'instructor':
@@ -34,6 +39,8 @@ const LoginPage: React.FC = () => {
           console.log('Instructor login successful:', instructorData);
           toast.success('Login successful!');
           localStorage.setItem('instructorToken', instructorData.access_token);
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('studentToken');
           navigate('/instructor');
           break;
         case 'student':
@@ -41,6 +48,8 @@ const LoginPage: React.FC = () => {
           console.log('Student login successful:', studentData);
           toast.success('Login successful!');
           localStorage.setItem('studentToken', studentData.access_token);
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('instructorToken');
           navigate('/student');
           break;
         default:
@@ -50,6 +59,8 @@ const LoginPage: React.FC = () => {
       console.error('Login error:', err);
       if (err instanceof Error) {
         setError(err.message);
+      } else if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.detail || 'An unexpected error occurred during login.');
       } else {
         setError('An unexpected error occurred during login.');
       }

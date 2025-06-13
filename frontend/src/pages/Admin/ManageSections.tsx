@@ -92,6 +92,7 @@ const ManageSections: React.FC = () => {
     try {
       setLoading(true);
       const res = await getSections(); // Use actual API call
+      console.log("Sections data received from API:", res.data);
       setSections(res.data); // Set sections with data from API
     } catch (err) {
       console.error('Error fetching sections:', err);
@@ -315,9 +316,15 @@ const ManageSections: React.FC = () => {
       });
       setSelectedCourseName(null);
       setSelectedInstructorName(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error assigning course:', err);
-      toast.error('Failed to assign course');
+      if (err.response && err.response.status === 409) {
+        toast.error('Course already assigned to this section.');
+      } else {
+        toast.error(err.response?.data?.detail || 'Failed to assign course.');
+      }
+    } finally {
+      setShowAssignModal(false);
     }
   };
 

@@ -13,7 +13,7 @@ SECRET_KEY = "your-student-secret-key" # Change this to a strong, random key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-router = APIRouter(tags=["Student Authentication"])
+router = APIRouter(tags=["Student Auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="student/token")
 

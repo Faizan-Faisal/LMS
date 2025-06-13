@@ -1,16 +1,16 @@
 from sqlalchemy.orm import Session, joinedload
 from datetime import date
-from models.admin.announcements import Announcement
+from models.shared.announcements import Announcement
 from models.admin.department import Department  # Import Department model
 
 # Helper to convert string date to date object
 def _convert_date_string_to_date(date_str: str | None) -> date | None:
-    if date_str:
-        try:
-            return date.fromisoformat(date_str) # Assumes YYYY-MM-DD format
-        except ValueError:
-            return None # Handle invalid date string gracefully
-    return None
+    if not date_str:
+        return None
+    try:
+        return date.fromisoformat(date_str) # Assumes YYYY-MM-DD format
+    except (ValueError, TypeError):
+        return None # Handle invalid date string gracefully
 
 # CREATE announcement
 def create_announcement(
@@ -21,22 +21,34 @@ def create_announcement(
     recipient_ids: str | None,
     priority: str,
     valid_until: str | None,
-    department_name:str | None = None # Add department_id
+    department_name: str | None = None,
+    sender_type: str = 'Admin',  # New: Default to Admin
+    sender_id: str | None = None   # New: Optional sender_id
 ):
-    valid_until_date = _convert_date_string_to_date(valid_until)
-    announcement = Announcement(
-        title=title,
-        message=message,
-        recipient_type=recipient_type,
-        recipient_ids=recipient_ids,
-        priority=priority,
-        valid_until=valid_until_date,
-        department_name=department_name # Assign department_id
-    )
-    db.add(announcement)
-    db.commit()
-    db.refresh(announcement)
-    return announcement
+    print(f"[DEBUG] CRUD - create_announcement: received valid_until='{valid_until}', sender_type='{sender_type}', sender_id='{sender_id}'")
+    try:
+        valid_until_date = _convert_date_string_to_date(valid_until)
+        print(f"[DEBUG] CRUD - Converted valid_until_date='{valid_until_date}'")
+        announcement = Announcement(
+            title=title,
+            message=message,
+            recipient_type=recipient_type,
+            recipient_ids=recipient_ids,
+            priority=priority,
+            valid_until=valid_until_date,
+            department_name=department_name,
+            sender_type=sender_type,  # Assign sender_type
+            sender_id=sender_id       # Assign sender_id
+        )
+        db.add(announcement)
+        db.commit()
+        db.refresh(announcement)
+        print(f"[DEBUG] CRUD - Announcement added to DB with ID: {announcement.announcement_id}")
+        return announcement
+    except Exception as e:
+        db.rollback()
+        print(f"[DEBUG] CRUD - Error in create_announcement: {str(e)}")
+        raise Exception(f"Error creating announcement: {str(e)}")
 
 # GET all announcements
 def get_all_announcements(db: Session):

@@ -10,6 +10,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { getdepartments } from '../../api/departmentapi'; // Import getdepartments
 import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
+import Icon from '../../components/Icon';
+import type { IconBaseProps } from 'react-icons';
 
 interface Department { // Define Department interface
     
@@ -35,12 +37,16 @@ interface AnnouncementCreatePayload {
     department_name?: string | null; // Changed from department_id to department_name
     priority?: 'Normal' | 'High';
     valid_until?: string | null;
+    sender_type: string;
+    sender_id?: string | null;
 }
 
 interface AnnouncementRead extends AnnouncementBase {
     announcement_id: number;
     created_at: string; // datetime object from backend will be string in frontend
     department?: Department; // Include department details
+    sender_type: string; // New: Include sender_type
+    sender_id?: string | null; // New: Include sender_id
 }
 
 interface AnnouncementFormState {
@@ -131,7 +137,9 @@ const ManageAnnouncements: React.FC = () => {
             message: form.message,
             recipient_type: form.recipient_type,
             priority: form.priority,
-            valid_until: form.valid_until ? form.valid_until.toISOString().split('T')[0] : null // YYYY-MM-DD
+            valid_until: form.valid_until ? form.valid_until.toISOString().split('T')[0] : null, // YYYY-MM-DD
+            sender_type: 'Admin', // Explicitly set sender_type for Admin portal
+            sender_id: null, // Admin usually doesn't have a sender_id in this context
         };
 
         // Conditionally add recipient_ids or department_name
@@ -430,6 +438,8 @@ const ManageAnnouncements: React.FC = () => {
                                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Recipients</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Priority</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Valid Until</th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Sender Type</th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Sender ID</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                                 </tr>
@@ -461,6 +471,12 @@ const ManageAnnouncements: React.FC = () => {
                                                 {announcement.valid_until ? new Date(announcement.valid_until).toLocaleDateString() : 'N/A'}
                                             </td>
                                             <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                                {announcement.sender_type}
+                                            </td>
+                                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                                {announcement.sender_id || 'N/A'}
+                                            </td>
+                                            <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                                 <span className={`relative inline-block px-3 py-1 font-semibold leading-tight ${statusColor}`}> 
                                                     {statusText}
                                                 </span>
@@ -469,24 +485,24 @@ const ManageAnnouncements: React.FC = () => {
                                                 <div className="flex items-center space-x-2">
                                                     <button
                                                         onClick={() => handleView(announcement)}
-                                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded"
+                                                        className="text-blue-600 hover:text-blue-900 focus:outline-none"
                                                         title="View"
                                                     >
-                                                        <FaEye />
+                                                        <Icon icon={FaEye} className="w-5 h-5" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleEdit(announcement)}
-                                                        className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-2 rounded"
+                                                        className="text-yellow-600 hover:text-yellow-900 focus:outline-none"
                                                         title="Edit"
                                                     >
-                                                        <FaEdit />
+                                                        <Icon icon={FaEdit} className="w-5 h-5" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteClick(announcement.announcement_id)}
-                                                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded"
+                                                        className="text-red-600 hover:text-red-900 focus:outline-none"
                                                         title="Delete"
                                                     >
-                                                        <FaTrash />
+                                                        <Icon icon={FaTrash} className="w-5 h-5" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -507,21 +523,20 @@ const ManageAnnouncements: React.FC = () => {
                         <div className="space-y-2">
                             <p><strong>Title:</strong> {selectedAnnouncement.title}</p>
                             <p><strong>Message:</strong> {selectedAnnouncement.message}</p>
-                            <p><strong>Recipient Type:</strong> {selectedAnnouncement.recipient_type === 'all_students' ? 'All Students' :
-                                                 selectedAnnouncement.recipient_type === 'all_instructors' ? 'All Instructors' :
-                                                 selectedAnnouncement.recipient_type === 'specific_students' ? `Specific Students (${selectedAnnouncement.recipient_ids || 'N/A'})` :
-                                                 selectedAnnouncement.recipient_type === 'specific_instructors' ? `Specific Instructors (${selectedAnnouncement.recipient_ids || 'N/A'})` :
-                                                 selectedAnnouncement.recipient_type === 'department_instructors' ? `Department Instructors (${selectedAnnouncement.department?.department_name || 'N/A'})` : 'N/A'}
-                            </p>
+                            <p className="mb-2"><strong className="font-semibold">Recipient Type:</strong> {selectedAnnouncement.recipient_type}</p>
                             {selectedAnnouncement.recipient_ids && (
-                                <p><strong>Recipient IDs:</strong> {selectedAnnouncement.recipient_ids}</p>
+                                <p className="mb-2"><strong className="font-semibold">Recipient IDs:</strong> {selectedAnnouncement.recipient_ids}</p>
                             )}
-                            {selectedAnnouncement.department?.department_name && (
-                                <p><strong>Department:</strong> {selectedAnnouncement.department.department_name}</p>
+                            {selectedAnnouncement.department_name && (
+                                <p className="mb-2"><strong className="font-semibold">Department:</strong> {selectedAnnouncement.department_name}</p>
                             )}
-                            <p><strong>Priority:</strong> {selectedAnnouncement.priority}</p>
-                            <p><strong>Valid Until:</strong> {selectedAnnouncement.valid_until ? new Date(selectedAnnouncement.valid_until).toLocaleDateString() : 'N/A'}</p>
-                            <p><strong>Created At:</strong> {new Date(selectedAnnouncement.created_at).toLocaleDateString()}</p>
+                            <p className="mb-2"><strong className="font-semibold">Priority:</strong> {selectedAnnouncement.priority}</p>
+                            <p className="mb-2"><strong className="font-semibold">Valid Until:</strong> {selectedAnnouncement.valid_until || 'N/A'}</p>
+                            <p className="mb-2"><strong className="font-semibold">Sender Type:</strong> {selectedAnnouncement.sender_type}</p>
+                            {selectedAnnouncement.sender_id && (
+                                <p className="mb-2"><strong className="font-semibold">Sender ID:</strong> {selectedAnnouncement.sender_id}</p>
+                            )}
+                            <p className="mb-4"><strong className="font-semibold">Created At:</strong> {new Date(selectedAnnouncement.created_at).toLocaleString()}</p>
                         </div>
                         <div className="mt-6 flex justify-end">
                             <button

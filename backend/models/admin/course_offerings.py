@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base
+# from pydantic import BaseModel
+from typing import Optional
 
 class CourseOffering(Base):
     __tablename__ = "course_offerings"
@@ -23,5 +25,22 @@ class CourseOffering(Base):
     __table_args__ = (
         UniqueConstraint("course_id", "section_name", name="unique_course_section"),
     )
+
+
+# # Pydantic Models for Course Offering (Admin context)
+# class CourseOfferingBase(BaseModel):
+#     course_id: str
+#     section_name: str
+#     instructor_id: str
+#     capacity: int
+
+# class CourseOfferingCreate(CourseOfferingBase):
+#     pass # No additional fields needed for creation currently
+
+# class CourseOfferingResponse(CourseOfferingBase):
+#     offering_id: int
+
+#     class Config:
+#         from_attributes = True
 
 
