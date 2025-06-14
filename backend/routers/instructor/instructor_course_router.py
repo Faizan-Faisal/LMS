@@ -7,7 +7,7 @@ from crud.instructor import instructor_course_crud
 from models.instructor.course_offerings import CourseOfferingResponse
 from routers.instructor.instructor_auth_router import get_current_instructor
 
-router = APIRouter(prefix="/instructor", tags=["Instructor Courses"])
+router = APIRouter( tags=["Instructor Courses"])
 
 @router.get("/courses", response_model=List[CourseOfferingResponse])
 def get_instructor_courses(

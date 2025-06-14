@@ -102,6 +102,59 @@ CREATE TABLE `student_course_enrollments` (
 
     UNIQUE (`student_id`, `offering_id`) -- Ensures a student enrolls in a specific offering only once
 );
+-- INSTUCTORS TABLES    
+
+CREATE TABLE IF NOT EXISTS attendance_records (
+    attendance_id INT AUTO_INCREMENT PRIMARY KEY,
+    offering_id INT NOT NULL,
+    student_id VARCHAR(20) NOT NULL,
+    attendance_date DATE NOT NULL,
+    status ENUM('Present', 'Absent', 'Leave') NOT NULL,
+
+    CONSTRAINT fk_attend_offering FOREIGN KEY (offering_id)
+        REFERENCES course_offerings(offering_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_attend_student FOREIGN KEY (student_id)
+        REFERENCES students(student_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    UNIQUE (offering_id, student_id, attendance_date) -- Prevents duplicate entries
+);
+
+CREATE TABLE IF NOT EXISTS course_materials (
+    material_id INT AUTO_INCREMENT PRIMARY KEY,
+    offering_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    file_path VARCHAR(255) NOT NULL,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_material_offering FOREIGN KEY (offering_id)
+        REFERENCES course_offerings(offering_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS exam_records ( 
+exam_id INT AUTO_INCREMENT PRIMARY KEY, 
+offering_id INT NOT NULL, 
+student_id VARCHAR(20) NOT NULL, 
+exam_type ENUM('Quiz', 'Midterm', 'Final', 'Assignment') NOT NULL, 
+total_marks INT NOT NULL, 
+obtained_marks INT NOT NULL, 
+exam_date DATE NOT NULL, 
+CONSTRAINT fk_exam_offering FOREIGN KEY (offering_id) 
+REFERENCES course_offerings(offering_id) 
+ON DELETE CASCADE ON UPDATE CASCADE, 
+CONSTRAINT fk_exam_student FOREIGN KEY (student_id) 
+REFERENCES students(student_id) 
+ON DELETE CASCADE ON UPDATE CASCADE 
+);
+
 
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;

@@ -10,7 +10,7 @@ const CourseManagement: React.FC = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const token = localStorage.getItem('instructorToken');
+                const token = sessionStorage.getItem('instructorToken');
                 console.log("Instructor Token before API call:", token);
                 setLoading(true);
                 const data = await getInstructorCourses();

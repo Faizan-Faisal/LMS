@@ -1,6 +1,8 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+from pydantic import BaseModel
+from typing import Optional
 
 class Student(Base):
     __tablename__ = "students"
@@ -19,3 +21,24 @@ class Student(Base):
     # Relationship to Department
     department_rel = relationship("Department", back_populates="students")
     section_rel = relationship("Section", back_populates="students")
+    
+    # Relationships for attendance and exam records
+    attendances_records = relationship("Attendance", back_populates="student")
+    exam_records = relationship("ExamRecord", back_populates="student")
+    enrollments = relationship("StudentCourseEnrollment", back_populates="student_rel")
+
+# Pydantic Model for response
+class StudentResponse(BaseModel):
+    student_id: str
+    first_name: str
+    last_name: str
+    email: str
+    phone_number: str
+    cnic: str
+    program: Optional[str] = None
+    section: Optional[str] = None
+    enrollment_year: int
+    picture: Optional[str] = None
+
+    class Config:
+        from_attributes = True

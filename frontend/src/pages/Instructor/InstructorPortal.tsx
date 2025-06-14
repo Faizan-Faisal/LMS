@@ -8,7 +8,9 @@ import {
     FaBook,
     FaClipboardList,
     FaChartLine,
-    FaUserCircle
+    FaUserCircle,
+    FaCalendarCheck,
+    FaFileAlt
 } from 'react-icons/fa';
 import type { IconBaseProps } from 'react-icons';
 import { getInstructorById } from '../../api/instructorapi'; // Import the API function
@@ -16,6 +18,8 @@ import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
 import ManageAnnouncements from './ManageAnnouncements';
 import CourseManagement from './CourseManagement'; // Import the new CourseManagement component
+import Attendance from './Attendance';
+import ExamRecord from './ExamRecord';
 import Icon from '../../components/Icon';
 
 interface InstructorProfile {
@@ -62,6 +66,16 @@ const navItems: NavItem[] = [
         path: '/instructor/courses', 
         icon: FaGraduationCap
     },
+    {
+        label: 'Attendance',
+        path: '/instructor/attendance',
+        icon: FaCalendarCheck
+    },
+    {
+        label: 'Exam Records',
+        path: '/instructor/exam-records',
+        icon: FaFileAlt
+    },
     { 
         label: 'Logout', 
         path: '#', 
@@ -103,7 +117,7 @@ const InstructorPortal: React.FC = () => {
     useEffect(() => {
         const fetchInstructorProfile = async () => {
             try {
-                const token = localStorage.getItem('instructorToken');
+                const token = sessionStorage.getItem('instructorToken');
                 if (!token) {
                     toast.error("No authentication token found. Please log in.");
                     navigate('/login?role=instructor');
@@ -127,7 +141,7 @@ const InstructorPortal: React.FC = () => {
     }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem('instructorToken');
+        sessionStorage.removeItem('instructorToken');
         toast.info("Logged out successfully.");
         navigate('/login?role=instructor');
     };
@@ -141,6 +155,21 @@ const InstructorPortal: React.FC = () => {
                     <ul className="space-y-2">
                         {navItems.map((item) => {
                             const IconComponent = item.icon;
+                            if (item.label === 'Logout') {
+                                return (
+                                    <li key={item.path}>
+                                        <button
+                                            onClick={handleLogout}
+                                            className={`flex items-center w-full px-4 py-2 text-sm font-medium rounded-md text-left ${
+                                                'text-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                                            }`}
+                                        >
+                                            <IconComponent className="h-5 w-5 mr-2" />
+                                            {item.label}
+                                        </button>
+                                    </li>
+                                );
+                            }
                             return (
                                 <li key={item.path}>
                                     <Link
@@ -162,7 +191,7 @@ const InstructorPortal: React.FC = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-8">
+            <main className="flex-1 p-8 overflow-y-auto">
                 <Routes>
                     <Route path="/" element={
                         <>
@@ -250,6 +279,8 @@ const InstructorPortal: React.FC = () => {
                     } />
                     <Route path="announcements" element={<ManageAnnouncements />} />
                     <Route path="courses" element={<CourseManagement />} />
+                    <Route path="attendance" element={<Attendance />} />
+                    <Route path="exam-records" element={<ExamRecord />} />
                 </Routes>
             </main>
         </div>

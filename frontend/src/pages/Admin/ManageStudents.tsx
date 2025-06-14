@@ -1,33 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 // Assume studentapi.ts exists with similar functions for students
-import { getStudents, addStudent, getStudentById, updateStudent, deleteStudent } from '../../api/studentapi';
+import { getStudents, addStudent, getStudentById, updateStudent, deleteStudent, StudentResponse } from '../../api/studentapi';
 // Assume API functions for programs exist
 import { getSections } from '../../api/sectionapi';
 import { getdepartments } from '../../api/departmentapi';
 
-interface Student {
-  student_id: string; // Change back to string for the pattern
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  cnic: string;
-  program: string; // Assuming program is a string identifier
-  section: string; // Assuming section is a string identifier
-  enrollment_year: number;
-  picture?: string; // Optional picture filename
-}
-
 const ManageStudents: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<StudentResponse[]>([]);
   const [programs, setPrograms] = useState<string[]>([]); // State for programs
   const [sections, setSections] = useState<string[]>([]); // State for sections
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState<'add' | 'edit'>('add');
-  const [selected, setSelected] = useState<Student | null>(null);
-  const [viewed, setViewed] = useState<Student | null>(null);
+  const [selected, setSelected] = useState<StudentResponse | null>(null);
+  const [viewed, setViewed] = useState<StudentResponse | null>(null);
   const [formData, setFormData] = useState<any>({
     student_id: '', // Initialize as empty string
     first_name: '',
@@ -118,7 +105,7 @@ const ManageStudents: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleEdit = (student: Student) => {
+  const handleEdit = (student: StudentResponse) => {
     setFormType('edit');
     setSelected(student);
     const pictureUrl = student.picture ? `http://localhost:8000/uploads_student_img/${student.picture}` : null; // Construct full URL
@@ -271,7 +258,7 @@ const ManageStudents: React.FC = () => {
     fetchStudents();
   };
 
-  const handleView = (student: Student) => {
+  const handleView = (student: StudentResponse) => {
     setViewed(student);
   };
   const closeView = () => setViewed(null);

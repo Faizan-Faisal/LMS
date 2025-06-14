@@ -2,6 +2,36 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:8000/api/course_offerings';
 
+interface CourseRead {
+    course_id: string;
+    course_name: string;
+    course_description?: string;
+    course_credit_hours: number;
+}
+
+interface SectionRead {
+    section_name: string;
+    department?: string;
+    semester?: string;
+}
+
+interface InstructorRead {
+    instructor_id: string;
+    first_name: string;
+    last_name: string;
+}
+
+export interface CourseOfferingResponse {
+    offering_id: number;
+    course_id: string;
+    section_name: string;
+    instructor_id: string;
+    capacity: number;
+    course_rel: CourseRead;
+    section_rel: SectionRead;
+    instructor_rel: InstructorRead;
+}
+
 // Create a new course offering
 export const createCourseOffering = (
     course_id: string,
@@ -19,7 +49,10 @@ export const createCourseOffering = (
 };
 
 // Get all course offerings
-export const getAllCourseOfferings = () => axios.get(BASE_URL);
+export const getCourseOfferings = async (): Promise<CourseOfferingResponse[]> => {
+    const response = await axios.get(BASE_URL);
+    return response.data;
+};
 
 // Get a course offering by ID
 export const getCourseOfferingById = (offering_id: number) => 

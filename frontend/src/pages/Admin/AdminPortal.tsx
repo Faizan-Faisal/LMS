@@ -23,6 +23,7 @@ import ManageSettings from './ManageSettings';
 import ManageCourses from './ManageCourses';
 import ManageDepartments from './ManageDepartments';
 import ManageAnnouncements from './ManageAnnouncements';
+import StudentEnrollmentManagement from './StudentEnrollmentManagement';
 import Icon from '../../components/Icon';
 // Import API functions
 import { getInstructors } from '../../api/instructorapi';

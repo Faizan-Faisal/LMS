@@ -4,7 +4,7 @@ const BASE_URL = 'http://localhost:8000/api'; // Changed BASE_URL to handle inst
 
 // Helper to get authorization headers (from instructorAuthApi.ts)
 const getAuthHeaders = () => {
-    const token = localStorage.getItem('instructorToken');
+    const token = sessionStorage.getItem('instructorToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
 

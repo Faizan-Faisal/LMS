@@ -12,4 +12,5 @@ class Section(Base):
     # Relationship to Department
     department_rel = relationship("Department", back_populates="sections")
     students = relationship("Student", back_populates="section_rel")
-    offerings = relationship("CourseOffering", back_populates="section_rel") 
+    # attendances = relationship("Attendance", back_populates="section_rel")
+    offerings = relationship("CourseOffering", back_populates="section_rel")

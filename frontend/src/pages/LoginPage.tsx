@@ -29,27 +29,27 @@ const LoginPage: React.FC = () => {
       switch (userType) {
         case 'admin':
           toast.success('Login successful!');
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('instructorToken');
-          localStorage.removeItem('studentToken');
+          sessionStorage.removeItem('adminToken');
+          sessionStorage.removeItem('instructorToken');
+          sessionStorage.removeItem('studentToken');
           navigate('/admin');
           break;
         case 'instructor':
           const instructorData = await loginInstructor(username, password);
           console.log('Instructor login successful:', instructorData);
           toast.success('Login successful!');
-          localStorage.setItem('instructorToken', instructorData.access_token);
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('studentToken');
+          sessionStorage.setItem('instructorToken', instructorData.access_token);
+          sessionStorage.removeItem('adminToken');
+          sessionStorage.removeItem('studentToken');
           navigate('/instructor');
           break;
         case 'student':
           const studentData = await loginStudent(username, password);
           console.log('Student login successful:', studentData);
           toast.success('Login successful!');
-          localStorage.setItem('studentToken', studentData.access_token);
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('instructorToken');
+          sessionStorage.setItem('studentToken', studentData.access_token);
+          sessionStorage.removeItem('adminToken');
+          sessionStorage.removeItem('instructorToken');
           navigate('/student');
           break;
         default:

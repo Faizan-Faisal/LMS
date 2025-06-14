@@ -6,13 +6,15 @@ import {
     FaClipboardList, 
     FaBullhorn, 
     FaSignOutAlt,
-    FaUserCircle
+    FaUserCircle,
+    FaUsers
 } from 'react-icons/fa';
 import type { IconBaseProps } from 'react-icons';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
 import { getStudentById } from '../../api/studentapi';
 import Icon from '../../components/Icon';
+import Enrollment from './Enrollment';
 
 interface StudentProfile {
     student_id: string;
@@ -40,6 +42,11 @@ const navItems: NavItem[] = [
         icon: FaHome
     },
     { 
+        label: 'Enrollment', 
+        path: '/student/enrollment', 
+        icon: FaUsers
+    },
+    { 
         label: 'Announcements', 
         path: '/student/announcements', 
         icon: FaBullhorn
@@ -61,7 +68,7 @@ const StudentPortal: React.FC = () => {
     useEffect(() => {
         const fetchStudentProfile = async () => {
             try {
-                const token = localStorage.getItem('studentToken');
+                const token = sessionStorage.getItem('studentToken');
                 if (!token) {
                     toast.error("No authentication token found. Please log in.");
                     navigate('/login?role=student');
@@ -85,7 +92,7 @@ const StudentPortal: React.FC = () => {
     }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem('studentToken');
+        sessionStorage.removeItem('studentToken');
         toast.info("Logged out successfully.");
         navigate('/login?role=student');
     };
@@ -99,6 +106,21 @@ const StudentPortal: React.FC = () => {
                     <ul className="space-y-2">
                         {navItems.map((item) => {
                             const IconComponent = item.icon;
+                            if (item.label === 'Logout') {
+                                return (
+                                    <li key={item.path}>
+                                        <button
+                                            onClick={handleLogout}
+                                            className={`flex items-center w-full px-4 py-2 text-sm font-medium rounded-md text-left ${
+                                                'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                            }`}
+                                        >
+                                            <IconComponent className="h-5 w-5 mr-2" />
+                                            {item.label}
+                                        </button>
+                                    </li>
+                                );
+                            }
                             return (
                                 <li key={item.path}>
                                     <Link
@@ -176,6 +198,7 @@ const StudentPortal: React.FC = () => {
                         </>
                     } />
                     <Route path="announcements" element={<div className="bg-white rounded-xl shadow p-6">Student Announcements Page (To be implemented)</div>} />
+                    <Route path="enrollment" element={<Enrollment />} />
                 </Routes>
             </main>
         </div>

@@ -20,11 +20,17 @@ class CourseOffering(Base):
     section_rel = relationship("Section", back_populates="offerings")
     instructor_rel = relationship("Instructor", back_populates="offerings")
 
-
+    course_materials = relationship("CourseMaterial", back_populates="offering")
+    exam_records = relationship("ExamRecord", back_populates="offering")
+    attendances_records = relationship("Attendance", back_populates="offering")
+    enrollments = relationship("StudentCourseEnrollment", back_populates="offering_rel")
     # Enforce unique constraint (course_id, section_name)
     __table_args__ = (
         UniqueConstraint("course_id", "section_name", name="unique_course_section"),
     )
+
+    def __repr__(self):
+        return f"<CourseOffering(offering_id={self.offering_id}, course_id='{self.course_id}', section_name='{self.section_name}')>"
 
 
 # # Pydantic Models for Course Offering (Admin context)

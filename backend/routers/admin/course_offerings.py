@@ -38,6 +38,23 @@ class CourseOfferingDetails(BaseModel):
     class Config:
         orm_mode = True # To allow SQLAlchemy models to be returned
 
+class InstructorRel(BaseModel):
+    first_name: str
+    last_name: str
+
+class CourseRel(BaseModel):
+    course_name: str
+
+class CourseOfferingNestedResponse(BaseModel):
+    offering_id: int
+    capacity: int
+    section_name: str
+    course_rel: CourseRel
+    instructor_rel: InstructorRel
+
+    class Config:
+        orm_mode = True
+
 # --- Create ---
 @router.post("/", response_model=CourseOfferingRead, status_code=status.HTTP_201_CREATED)
 def create_offering(
@@ -127,7 +144,7 @@ def update_offering(
 
 
 # --- Get by Section with Details (New Functionality) ---
-@router.get("/section/{section_name}/details", response_model=list[CourseOfferingDetails])
+@router.get("/section/{section_name}/details", response_model=list[CourseOfferingNestedResponse])
 def get_offerings_by_section_details(
     section_name: str,
     db: Session = Depends(get_db)
@@ -135,15 +152,18 @@ def get_offerings_by_section_details(
     details = crud_offering.get_course_offerings_by_section_details(db, section_name)
     if not details:
         raise HTTPException(status_code=404, detail="No course offerings found for this section.")
-    
-    # Map the returned tuples/rows to the Pydantic model
-    return [CourseOfferingDetails(
-        offering_id=d[0],
-        capacity=d[1],
-        course_name=d[2],
-        instructor_first_name=d[3],
-        instructor_last_name=d[4]
-    ) for d in details]
+
+    # Map the returned tuples/rows to the nested Pydantic model
+    return [
+        CourseOfferingNestedResponse(
+            offering_id=d[0],
+            capacity=d[1],
+            section_name=section_name,
+            course_rel={"course_name": d[2]},
+            instructor_rel={"first_name": d[3], "last_name": d[4]}
+        )
+        for d in details
+    ]
 
 # --- Delete ---
 @router.delete("/{offering_id}", status_code=status.HTTP_204_NO_CONTENT)

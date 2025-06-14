@@ -4,7 +4,7 @@ import { getdepartments } from '../../api/departmentapi'; // Import department A
 import { getSections, addSection, getSectionByName, updateSection, deleteSection } from '../../api/sectionapi'; // Import section API
 import { getCourses } from '../../api/courseapi';
 import { getInstructors } from '../../api/instructorapi';
-import { createCourseOffering, getCourseOfferingsBySectionDetails } from '../../api/course_offerings';
+import { createCourseOffering, getCourseOfferingsBySectionDetails } from '../../api/CourseOfferingApi';
 
 // Define interface for a Section based on backend model
 interface Section {
