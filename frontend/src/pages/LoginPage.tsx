@@ -109,56 +109,58 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-xl">
+      <div className="w-full max-w-md">
         <div className={`rounded-3xl shadow-2xl overflow-hidden bg-gradient-to-br ${portal.gradient} p-1`}>
-          <div className="bg-white rounded-3xl p-12 flex flex-col items-center">
-            <div className="flex flex-col items-center mb-8">
+          <div className="bg-white rounded-3xl p-8 flex flex-col items-center">
+            <div className="flex flex-col items-center mb-6">
               {portal.icon}
-              <h2 className={`text-4xl font-extrabold mb-2 mt-4 tracking-tight ${portal.text}`}>{portal.label}</h2>
-              <p className="text-lg text-gray-600 font-medium">Welcome back! Please login to your account.</p>
+              <h2 className={`text-3xl font-extrabold mb-1 mt-3 tracking-tight ${portal.text}`}>{portal.label}</h2>
+              <p className="text-base text-gray-600 font-medium">Welcome back! Please login to your account.</p>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-8 w-full">
+            <form onSubmit={handleSubmit} className="space-y-6 w-full">
               <div>
-                <label htmlFor="username" className="block text-lg font-semibold text-gray-700 mb-2">Username</label>
+                <label htmlFor="username" className="block text-base font-semibold text-gray-700 mb-1">Username</label>
                 <div className="relative">
                   <input
                     type="text"
                     id="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:border-transparent text-lg transition duration-200"
+                    className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:border-transparent text-base transition duration-200"
                     placeholder="Enter your username"
                     required
                   />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-4">
-                    {userIcon}
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                   </div>
                 </div>
               </div>
               <div>
-                <label htmlFor="password" className="block text-lg font-semibold text-gray-700 mb-2">Password</label>
+                <label htmlFor="password" className="block text-base font-semibold text-gray-700 mb-1">Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-6 py-4 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:border-transparent text-lg transition duration-200"
+                    className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-300 focus:border-transparent text-base transition duration-200"
                     placeholder="Enter your password"
                     required
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-4"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
                   >
                     {showPassword ? (
-                      <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                       </svg>
                     ) : (
-                      <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
@@ -167,25 +169,25 @@ const LoginPage: React.FC = () => {
                 </div>
               </div>
               {error && (
-                <div className="text-red-500 text-lg text-center bg-red-50 p-4 rounded-xl font-semibold">{error}</div>
-              )}
+                   <div className="text-red-500 text-base text-center bg-red-50 p-3 rounded-lg font-semibold">{error}</div>
+                  )}
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <input id="remember-me" type="checkbox" className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                  <label htmlFor="remember-me" className="ml-3 block text-lg text-gray-700">Remember me</label>
-                </div>
-                <a href="#" className="text-lg text-blue-600 hover:text-blue-800 font-semibold">Forgot password?</a>
-              </div>
+                  <input id="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                  <label htmlFor="remember-me" className="ml-2 block text-base text-gray-700">Remember me</label>
+                  </div>
+                  <a href="#" className="text-base text-blue-600 hover:text-blue-800 font-semibold">Forgot password?</a>
+                  </div>
               <button
                 type="submit"
-                className={`w-full py-4 px-4 rounded-xl text-2xl font-bold text-white shadow-lg transform transition-transform duration-200 ${portal.button} hover:scale-105 hover:opacity-95 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-400`}
+                className={`w-full py-3 px-3 rounded-xl text-xl font-bold text-white shadow-lg transform transition-transform duration-200 ${portal.button} hover:scale-105 hover:opacity-95 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-400`}
               >
                 Sign In
               </button>
             </form>
-            <div className="mt-8 text-center">
-              <button onClick={() => navigate('/')} className="text-lg text-gray-600 hover:text-gray-800 font-semibold">← Back to Home</button>
-            </div>
+            <div className="mt-6 text-center">
+              <button onClick={() => navigate('/')} className="text-base text-gray-600 hover:text-gray-800 font-semibold">← Back to Home</button>
+             </div>
           </div>
         </div>
       </div>
@@ -194,3 +196,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage; 
+

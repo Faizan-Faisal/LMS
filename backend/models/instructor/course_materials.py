@@ -19,3 +19,13 @@ class CourseMaterial(Base):
         UniqueConstraint('file_path', name='unique_file_path'),
     )
 
+    def to_dict(self):
+        return {
+            "material_id": self.material_id,
+            "offering_id": self.offering_id,
+            "title": self.title,
+            "description": self.description,
+            "file_path": self.file_path,
+            "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None
+        }
+

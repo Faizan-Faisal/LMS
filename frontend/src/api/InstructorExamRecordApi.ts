@@ -14,7 +14,7 @@ export interface ExamRecord {
     offering_id: number;
     student_id: string;
     exam_type: 'MIDTERM' | 'FINAL' | 'QUIZ' | 'ASSIGNMENT';
-    marks_obtained: number;
+    obtained_marks: number;
     total_marks: number;
     exam_date: string; // Or Date if you parse it
     remarks?: string;
@@ -26,14 +26,14 @@ export interface ExamRecordCreate {
     offering_id: number;
     student_id: string;
     exam_type: 'MIDTERM' | 'FINAL' | 'QUIZ' | 'ASSIGNMENT';
-    marks_obtained: number;
+    obtained_marks: number;
     total_marks: number;
     exam_date: string; // ISO format string expected by FastAPI
     remarks?: string;
 }
 
 export interface ExamRecordUpdate {
-    marks_obtained?: number;
+    obtained_marks?: number;
     total_marks?: number;
     exam_date?: string; // ISO format string expected by FastAPI
     remarks?: string;

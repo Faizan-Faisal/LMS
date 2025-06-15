@@ -8,10 +8,10 @@ from typing import Optional, List
 from datetime import datetime
 
 class ExamTypeEnum(enum.Enum):
-    MIDTERM = "midterm"
-    FINAL = "final"
-    QUIZ = "quiz"
-    ASSIGNMENT = "assignment"
+    midterm = "midterm"
+    final = "final"
+    quiz = "quiz"
+    assignment = "assignment"
 
 
 class ExamRecord(Base):
@@ -21,7 +21,7 @@ class ExamRecord(Base):
     offering_id = Column(Integer, ForeignKey("course_offerings.offering_id"))
     student_id = Column(String(50), ForeignKey("students.student_id"))
     exam_type = Column(Enum(ExamTypeEnum))
-    marks_obtained = Column(Float)
+    obtained_marks = Column(Float)
     total_marks = Column(Float)
     exam_date = Column(DateTime)
     remarks = Column(String(500), nullable=True)
@@ -36,7 +36,7 @@ class ExamRecord(Base):
             "offering_id": self.offering_id,
             "student_id": self.student_id,
             "exam_type": self.exam_type.value if self.exam_type else None,
-            "marks_obtained": self.marks_obtained,
+            "obtained_marks": self.obtained_marks,
             "total_marks": self.total_marks,
             "exam_date": self.exam_date.isoformat() if self.exam_date else None,
             "remarks": self.remarks
@@ -47,7 +47,7 @@ class ExamRecordBase(BaseModel):
     offering_id: int
     student_id: str
     exam_type: ExamTypeEnum
-    marks_obtained: float
+    obtained_marks: float
     total_marks: float
     exam_date: datetime
     remarks: Optional[str] = None
@@ -56,7 +56,7 @@ class ExamRecordCreate(ExamRecordBase):
     pass
 
 class ExamRecordUpdate(BaseModel):
-    marks_obtained: Optional[float] = None
+    obtained_marks: Optional[float] = None
     total_marks: Optional[float] = None
     exam_date: Optional[datetime] = None
     remarks: Optional[str] = None

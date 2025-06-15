@@ -97,41 +97,60 @@ const Attendance: React.FC = () => {
 
         try {
             setLoadingAttendance(true);
-            const attendanceToSubmit: AttendanceCreate[] = students.map(student => ({
-                offering_id: selectedOfferingId,
-                student_id: student.student_id,
-                attendance_date: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD
-                status: attendanceStatus[student.student_id] || 'Absent', // Default to Absent if not marked
-            }));
+            const attendanceDateString = selectedDate.toISOString().split('T')[0];
 
-            // For simplicity, we'll try to create/update all records. 
-            // In a more robust system, you'd check if a record exists and then update or create.
-            for (const record of attendanceToSubmit) {
-                // This logic needs improvement for existing records. 
-                // For now, it will attempt to create. If unique constraint exists, it will fail.
-                // A proper solution would be: 
-                // 1. Fetch existing record for student+date+offering
-                // 2. If exists, call updateAttendanceRecord
-                // 3. If not, call createAttendanceRecord
+            const allExistingRecordsForOffering = await getAttendanceRecordsByOffering(selectedOfferingId);
+            const existingRecordsMap = new Map<string, AttendanceRecordType>();
+
+            allExistingRecordsForOffering.forEach(record => {
+                if (record.attendance_date.split('T')[0] === attendanceDateString) {
+                    existingRecordsMap.set(record.student_id, record);
+                }
+            });
+
+            let allOperationsSuccessful = true;
+
+            for (const student of students) {
+                const recordToSaveStatus = attendanceStatus[student.student_id] || 'Absent'; // Default to Absent if not marked
+                const existingRecord = existingRecordsMap.get(student.student_id);
+
                 try {
-                    await createAttendanceRecord(record);
-                } catch (err: any) {
-                    // If it's a unique constraint error (e.g., record already exists), try to update
-                    if (err.message && err.message.includes("unique_attendance_entry")) {
-                        // This would require a way to get the attendance_id for update
-                        // For this iteration, we'll keep it simple and assume creation or handle errors
-                        console.warn("Attendance record likely exists, consider updating instead of creating:", record);
+                    if (existingRecord) {
+                        if (existingRecord.status === recordToSaveStatus) {
+                            // Status is the same, no change needed, notify user
+                            toast.info(`Attendance for ${student.first_name} ${student.last_name} on ${attendanceDateString} is already marked as ${recordToSaveStatus}.`);
+                        } else {
+                            // Status is different, update it
+                            await updateAttendanceRecord(existingRecord.attendance_id, { status: recordToSaveStatus });
+                            toast.success(`Attendance for ${student.first_name} ${student.last_name} on ${attendanceDateString} updated to ${recordToSaveStatus}.`);
+                        }
                     } else {
-                        throw err; // Re-throw other errors
+                        // No existing record, create a new one
+                        const newRecord: AttendanceCreate = {
+                            offering_id: selectedOfferingId,
+                            student_id: student.student_id,
+                            attendance_date: attendanceDateString,
+                            status: recordToSaveStatus,
+                        };
+                        await createAttendanceRecord(newRecord);
+                        toast.success(`Attendance for ${student.first_name} ${student.last_name} on ${attendanceDateString} marked as ${recordToSaveStatus}.`);
                     }
+                } catch (err) {
+                    console.error(`Failed to save attendance for ${student.first_name} ${student.last_name}:`, err);
+                    toast.error(`Failed to save attendance for ${student.first_name} ${student.last_name}.`);
+                    allOperationsSuccessful = false; // Mark that at least one operation failed
                 }
             }
-            toast.success("Attendance saved successfully!");
-            // Refresh attendance data after saving
-            // This part will re-fetch all students and attendance for the selected date
-            const existingAttendance = await getAttendanceRecordsByOffering(selectedOfferingId);
+
+            // Optional: A final general toast if all operations completed without critical errors
+            // if (allOperationsSuccessful) {
+            //     toast.success("All attendance records processed!");
+            // }
+
+            // Refresh attendance data after saving/updating
+            const refreshedAttendance = await getAttendanceRecordsByOffering(selectedOfferingId);
             const currentDayAttendance: {[key: string]: 'Present' | 'Absent' | 'Leave'} = {};
-            existingAttendance.forEach(record => {
+            refreshedAttendance.forEach(record => {
                 if (new Date(record.attendance_date).toDateString() === selectedDate.toDateString()) {
                     currentDayAttendance[record.student_id] = record.status;
                 }
@@ -139,9 +158,9 @@ const Attendance: React.FC = () => {
             setAttendanceStatus(currentDayAttendance);
 
         } catch (err) {
-            console.error("Failed to save attendance:", err);
-            setError("Failed to save attendance.");
-            toast.error("Failed to save attendance.");
+            console.error("An unexpected error occurred during attendance save process:", err);
+            setError("An unexpected error occurred during attendance save process.");
+            toast.error("An unexpected error occurred. Please try again.");
         } finally {
             setLoadingAttendance(false);
         }
@@ -176,13 +195,17 @@ const Attendance: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 bg-white rounded-xl shadow-lg">
+        <div className="container mx-auto px-4 py-8 bg-white rounded-xl shadow-lg h-screen overflow-y-auto">
             <h1 className="text-3xl font-bold text-slate-800 mb-6">Attendance Management</h1>
 
             <div className="mb-6 flex items-center space-x-4">
                 <select
                     value={selectedOfferingId || ''}
-                    onChange={(e) => setSelectedOfferingId(Number(e.target.value))}
+                    onChange={(e) => {
+                        setSelectedOfferingId(Number(e.target.value));
+                        setViewMode('mark');
+                        setViewedAttendance([]);
+                    }}
                     className="border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                     <option value="">Select a Course Section</option>

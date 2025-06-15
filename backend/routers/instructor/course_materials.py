@@ -53,7 +53,6 @@ async def add_material(
         "title": title,
         "description": description,
         "file_path": file_path,
-        "upload_date": datetime.utcnow()
     }
     return crud.create_material(db, material_data)
 

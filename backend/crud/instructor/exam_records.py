@@ -34,7 +34,7 @@ def create_exam_record(db: Session, exam_record: ExamRecordCreate) -> ExamRecord
         offering_id=exam_record.offering_id,
         student_id=exam_record.student_id,
         exam_type=exam_record.exam_type,
-        marks_obtained=exam_record.marks_obtained,
+        obtained_marks=exam_record.obtained_marks,
         total_marks=exam_record.total_marks,
         exam_date=exam_record.exam_date,
         remarks=exam_record.remarks
@@ -49,8 +49,8 @@ def update_exam_record(db: Session, record_id: int, exam_record: ExamRecordUpdat
     if not db_exam:
         return None
     
-    if exam_record.marks_obtained is not None:
-        db_exam.marks_obtained = exam_record.marks_obtained
+    if exam_record.obtained_marks is not None:
+        db_exam.obtained_marks = exam_record.obtained_marks
     if exam_record.total_marks is not None:
         db_exam.total_marks = exam_record.total_marks
     if exam_record.exam_date is not None:
