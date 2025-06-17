@@ -1,6 +1,8 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+from pydantic import BaseModel
+from typing import Optional
 # from models.course_offerings import CourseOffering
 
 class Instructor(Base):
@@ -26,3 +28,20 @@ class Instructor(Base):
     # offerings = relationship(lambda: CourseOffering, back_populates="instructor_rel")
 
     offerings = relationship("CourseOffering", back_populates="instructor_rel")
+
+class InstructorBase(BaseModel):
+    instructor_id: str
+    first_name: str
+    last_name: str
+    email: str
+    phone_number: str
+    cnic: str
+    department: Optional[str] = None
+    qualification: Optional[str] = None
+    specialization: Optional[str] = None
+    year_of_experience: Optional[int] = None
+    picture: Optional[str] = None
+
+class InstructorResponse(InstructorBase):
+    class Config:
+        from_attributes = True

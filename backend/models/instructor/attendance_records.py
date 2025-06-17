@@ -13,8 +13,9 @@ class AttendanceStatusEnum(enum.Enum):
 
 class Attendance(Base):
     __tablename__ = "attendance_records"
+    __table_args__ = {'extend_existing': True}
 
-    attendance_id = Column(Integer, primary_key=True, autoincrement=True)
+    attendance_id = Column(Integer, primary_key=True, index=True)
     offering_id = Column(Integer, ForeignKey("course_offerings.offering_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     student_id = Column(String(20), ForeignKey("students.student_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     attendance_date = Column(Date, nullable=False)

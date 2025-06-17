@@ -16,6 +16,7 @@ class ExamTypeEnum(enum.Enum):
 
 class ExamRecord(Base):
     __tablename__ = "exam_records"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     offering_id = Column(Integer, ForeignKey("course_offerings.offering_id"))

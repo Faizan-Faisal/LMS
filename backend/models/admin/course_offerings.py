@@ -1,8 +1,11 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base
-# from pydantic import BaseModel
+from pydantic import BaseModel
 from typing import Optional
+
+from models.admin.course import CourseResponse
+from models.admin.instructor import InstructorResponse
 
 class CourseOffering(Base):
     __tablename__ = "course_offerings"
@@ -33,20 +36,22 @@ class CourseOffering(Base):
         return f"<CourseOffering(offering_id={self.offering_id}, course_id='{self.course_id}', section_name='{self.section_name}')>"
 
 
-# # Pydantic Models for Course Offering (Admin context)
-# class CourseOfferingBase(BaseModel):
-#     course_id: str
-#     section_name: str
-#     instructor_id: str
-#     capacity: int
+# Pydantic Models for Course Offering (Admin context)
+class CourseOfferingBase(BaseModel):
+    course_id: str
+    section_name: str
+    instructor_id: str
+    capacity: int
 
-# class CourseOfferingCreate(CourseOfferingBase):
-#     pass # No additional fields needed for creation currently
+class CourseOfferingCreate(CourseOfferingBase):
+    pass # No additional fields needed for creation currently
 
-# class CourseOfferingResponse(CourseOfferingBase):
-#     offering_id: int
+class CourseOfferingResponse(CourseOfferingBase):
+    offering_id: int
+    course_rel: Optional[CourseResponse] = None
+    instructor_rel: Optional[InstructorResponse] = None
 
-#     class Config:
-#         from_attributes = True
+    class Config:
+        from_attributes = True
 
 

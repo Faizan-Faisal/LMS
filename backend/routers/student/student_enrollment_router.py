@@ -8,7 +8,7 @@ from crud.admin import student_enrollment_crud
 from models.admin.student_enrollment import StudentCourseEnrollmentCreate, StudentCourseEnrollmentUpdate, StudentCourseEnrollmentResponse
 from models.admin.student import StudentResponse
 
-router = APIRouter(prefix="/student-enrollments", tags=["Student Enrollments"])
+router = APIRouter(prefix="/enrollments", tags=["Student Enrollments"])
 
 @router.post("", response_model=StudentCourseEnrollmentResponse, status_code=status.HTTP_201_CREATED)
 def create_enrollment(

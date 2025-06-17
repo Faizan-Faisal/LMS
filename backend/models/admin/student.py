@@ -6,6 +6,7 @@ from typing import Optional
 
 class Student(Base):
     __tablename__ = "students"
+    __table_args__ = {'extend_existing': True}
 
     student_id = Column(String(20), primary_key=True, index=True)  # Not auto-increment
     first_name = Column(String(100), nullable=False)

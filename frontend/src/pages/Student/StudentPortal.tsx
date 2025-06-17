@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { 
     FaHome, 
     FaBook, 
@@ -7,7 +7,10 @@ import {
     FaBullhorn, 
     FaSignOutAlt,
     FaUserCircle,
-    FaUsers
+    FaUsers,
+    FaGraduationCap,
+    FaRegListAlt,
+    FaClipboard
 } from 'react-icons/fa';
 import type { IconBaseProps } from 'react-icons';
 import { toast } from 'react-toastify';
@@ -15,6 +18,9 @@ import { jwtDecode } from 'jwt-decode';
 import { getStudentById } from '../../api/studentapi';
 import Icon from '../../components/Icon';
 import Enrollment from './Enrollment';
+import AttendancePage from './AttendancePage';
+import ExamRecordsPage from './ExamRecordsPage';
+import CourseMaterialsPage from './CourseMaterialsPage';
 
 interface StudentProfile {
     student_id: string;
@@ -41,11 +47,27 @@ const navItems: NavItem[] = [
         path: '/student', 
         icon: FaHome
     },
-    { 
-        label: 'Enrollment', 
-        path: '/student/enrollment', 
-        icon: FaUsers
+    {
+        label: 'Course Materials',
+        path: '/student/course-materials',
+        icon: FaBook
     },
+    {
+        label: 'Attendance',
+        path: '/student/attendance',
+        icon: FaClipboardList
+    },
+    {
+        label: 'Exam Records',
+        path: '/student/exam-records',
+        icon: FaGraduationCap
+    },
+    {
+        label: 'Enrollment',
+        path: '/student/enrollment',
+        icon: FaClipboard
+    },
+
     { 
         label: 'Announcements', 
         path: '/student/announcements', 
@@ -112,7 +134,9 @@ const StudentPortal: React.FC = () => {
                                         <button
                                             onClick={handleLogout}
                                             className={`flex items-center w-full px-4 py-2 text-sm font-medium rounded-md text-left ${
-                                                'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                // 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                 
+                                                'text-gray-300 hover:bg-gray-50 hover:text-gray-900'
                                             }`}
                                         >
                                             <IconComponent className="h-5 w-5 mr-2" />
@@ -123,17 +147,22 @@ const StudentPortal: React.FC = () => {
                             }
                             return (
                                 <li key={item.path}>
-                                    <Link
-                                        to={item.path}
-                                        className={`flex items-center px-4 py-2 text-sm font-medium rounded-md ${
-                                            location.pathname === item.path
-                                                ? 'bg-gray-100 text-gray-900'
-                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                        }`}
+                                    <NavLink
+                                        to={item.path === '/student/attendance' || item.path === '/student/exam-records' || item.path === '/student/course-materials' ? `${item.path}/${studentProfile?.student_id}` : item.path}
+                                        className={({ isActive }) =>
+                                            `flex items-center px-4 py-2 text-sm font-medium rounded-md ${
+                                                isActive
+                                                    // ? 'bg-gray-100 text-gray-900'
+                                                    // : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                      ? 'bg-gray-100 text-gray-900'
+                                                : 'text-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                                            }`
+                                        }
+                                        end={item.path === '/student'}
                                     >
                                         <IconComponent className="h-5 w-5 mr-2" />
                                         {item.label}
-                                    </Link>
+                                    </NavLink>
                                 </li>
                             );
                         })}
@@ -199,6 +228,9 @@ const StudentPortal: React.FC = () => {
                     } />
                     <Route path="announcements" element={<div className="bg-white rounded-xl shadow p-6">Student Announcements Page (To be implemented)</div>} />
                     <Route path="enrollment" element={<Enrollment />} />
+                    <Route path="attendance/:studentId" element={<AttendancePage />} />
+                    <Route path="exam-records/:studentId" element={<ExamRecordsPage />} />
+                    <Route path="course-materials/:studentId" element={<CourseMaterialsPage />} />
                 </Routes>
             </main>
         </div>

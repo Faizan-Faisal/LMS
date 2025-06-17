@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional
 
+from models.admin.course_offerings import CourseOfferingResponse # Import the new CourseOfferingResponse
+
 class StudentCourseEnrollment(Base):
     __tablename__ = "student_course_enrollments"
 
@@ -42,6 +44,7 @@ class StudentCourseEnrollmentUpdate(BaseModel):
 
 class StudentCourseEnrollmentResponse(StudentCourseEnrollmentBase):
     enrollment_id: int
+    offering_rel: Optional[CourseOfferingResponse] = None # Include the nested CourseOfferingResponse
 
     class Config:
         from_attributes = True 

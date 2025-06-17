@@ -5,8 +5,9 @@ import enum
 
 class CourseMaterial(Base):
     __tablename__ = "course_materials"
+    __table_args__ = {'extend_existing': True}
 
-    material_id = Column(Integer, primary_key=True, autoincrement=True)
+    material_id = Column(Integer, primary_key=True, index=True)
     offering_id = Column(Integer, ForeignKey("course_offerings.offering_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)

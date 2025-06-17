@@ -30,7 +30,7 @@ export const createStudentEnrollment = async (enrollment: StudentCourseEnrollmen
         return Promise.reject(new Error("No authentication token found. Please log in."));
     }
     try {
-        const response = await axios.post(`${BASE_URL}/api/student-enrollments`, enrollment, { headers });
+        const response = await axios.post(`${BASE_URL}/api/student/enrollments`, enrollment, { headers });
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -47,7 +47,7 @@ export const getStudentEnrollments = async (studentId: string): Promise<StudentC
         return Promise.reject(new Error("No authentication token found. Please log in."));
     }
     try {
-        const response = await axios.get(`${BASE_URL}/api/student-enrollments/student/${studentId}`, { headers });
+        const response = await axios.get(`${BASE_URL}/api/student/enrollments/student/${studentId}`, { headers });
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -64,7 +64,7 @@ export const deleteStudentEnrollment = async (enrollmentId: number): Promise<voi
         return Promise.reject(new Error("No authentication token found. Please log in."));
     }
     try {
-        await axios.delete(`${BASE_URL}/api/student-enrollments/${enrollmentId}`, { headers });
+        await axios.delete(`${BASE_URL}/api/student/enrollments/${enrollmentId}`, { headers });
     } catch (error) {
         if (axios.isAxiosError(error)) {
             console.error(`Error deleting enrollment ${enrollmentId}:`, error.response?.data || error.message);

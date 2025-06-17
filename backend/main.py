@@ -1,12 +1,13 @@
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-import os
 import logging
 
-from routers.admin import instructor, student, course, department, section, pre_course, course_offerings, student_enrollment_router
+from routers.admin import instructor, student, course, department, section, pre_course, course_offerings
 from routers.shared import announcements
 from routers.instructor import (
     instructor_auth_router,
@@ -15,7 +16,7 @@ from routers.instructor import (
     exam_records,
     course_materials
 )
-from routers.student import student_auth_router
+from routers.student import student_auth_router, attendance, exam_record, course_material, student_enrollment_router
 from routers.admin import admin_auth_router
 
 # Configure logging
@@ -94,12 +95,17 @@ app.include_router(course_offerings.router, prefix="/api/course_offerings", tags
 app.include_router(announcements.router, prefix="/api/announcements", tags=["Announcements"])
 app.include_router(admin_auth_router.router, prefix="/api/admin", tags=["Admin Auth"])
 app.include_router(instructor_course_router.router, prefix="/api/instructor", tags=["Instructor Courses"])
-app.include_router(student_enrollment_router.router, prefix="/api", tags=["Student Enrollments"])
+app.include_router(student_enrollment_router.router, prefix="/api/student", tags=["Student Enrollments"])
 
 # Include instructor-specific routers under the instructor prefix
 app.include_router(attendance_records.router, prefix="/api/instructor", tags=["Instructor Attendance"])
 app.include_router(exam_records.router, prefix="/api/instructor", tags=["Instructor Exams"])
 app.include_router(course_materials.router, prefix="/api/instructor", tags=["Instructor Materials"])
+
+# Include student-specific routers
+app.include_router(attendance.router, prefix="/api/student", tags=["Student Attendance"])
+app.include_router(exam_record.router, prefix="/api/student", tags=["Student Exams"])
+app.include_router(course_material.router, prefix="/api/student", tags=["Student Materials"])
 
 if __name__ == "__main__":
     import uvicorn

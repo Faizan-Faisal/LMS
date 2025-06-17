@@ -1,8 +1,11 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from datetime import date
 
 from models.admin.student_enrollment import StudentCourseEnrollment, StudentCourseEnrollmentCreate, StudentCourseEnrollmentUpdate
+from models.admin.course_offerings import CourseOffering
+from models.admin.course import Course
+from models.admin.instructor import Instructor
 
 def create_student_enrollment(db: Session, enrollment: StudentCourseEnrollmentCreate) -> StudentCourseEnrollment:
     db_enrollment = StudentCourseEnrollment(
@@ -39,7 +42,15 @@ def get_enrollment_by_id(db: Session, enrollment_id: int) -> Optional[StudentCou
     return db.query(StudentCourseEnrollment).filter(StudentCourseEnrollment.enrollment_id == enrollment_id).first()
 
 def get_enrollments_by_student_id(db: Session, student_id: str) -> List[StudentCourseEnrollment]:
-    return db.query(StudentCourseEnrollment).filter(StudentCourseEnrollment.student_id == student_id).all()
+    return db.query(StudentCourseEnrollment)\
+        .filter(StudentCourseEnrollment.student_id == student_id)\
+        .options(\
+            joinedload(StudentCourseEnrollment.offering_rel)
+            .joinedload(CourseOffering.course_rel),
+            joinedload(StudentCourseEnrollment.offering_rel)
+            .joinedload(CourseOffering.instructor_rel)
+        )\
+        .all()
 
 def get_enrollments_by_offering_id(db: Session, offering_id: int) -> List[StudentCourseEnrollment]:
     return db.query(StudentCourseEnrollment).filter(StudentCourseEnrollment.offering_id == offering_id).all()
