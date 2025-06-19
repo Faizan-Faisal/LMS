@@ -45,3 +45,6 @@ def delete_section(db: Session, section_name: str):
         db.commit()
         return True
     return False
+
+def get_sections_by_department_semester(db: Session, department: str, semester: str):
+    return db.query(Section).filter(Section.department == department, Section.semester == semester).all()

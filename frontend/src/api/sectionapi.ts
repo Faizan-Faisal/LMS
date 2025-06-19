@@ -11,3 +11,7 @@ export const updateSection = (name: string, data: FormData) => axios.put(`${BASE
     },
 });
 export const deleteSection = (name: string) => axios.delete(`${BASE_URL}/${name}`);
+export const getSectionsByDepartmentSemester = (department: string, semester: string) =>
+  axios.get(`${BASE_URL}/by-department-semester/`, {
+    params: { department, semester },
+  });

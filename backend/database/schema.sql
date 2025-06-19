@@ -155,6 +155,43 @@ REFERENCES students(student_id)
 ON DELETE CASCADE ON UPDATE CASCADE 
 );
 
+-- Admin Roles Tables
+CREATE TABLE IF NOT EXISTS admin_users (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    full_name VARCHAR(100),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS admin_roles (
+    role_id INT AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS admin_permissions (
+    permission_id INT AUTO_INCREMENT PRIMARY KEY,
+    permission_name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS admin_role_permissions (
+    role_id INT,
+    permission_id INT,
+    FOREIGN KEY (role_id) REFERENCES admin_roles(role_id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES admin_permissions(permission_id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE IF NOT EXISTS admin_user_roles (
+    admin_id INT,
+    role_id INT,
+    FOREIGN KEY (admin_id) REFERENCES admin_users(admin_id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES admin_roles(role_id) ON DELETE CASCADE,
+    PRIMARY KEY (admin_id, role_id)
+);
 
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;

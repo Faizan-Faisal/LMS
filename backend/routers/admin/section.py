@@ -71,3 +71,8 @@ def delete_section(section_name: str, db: Session = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="section not found")
     return {"message": "section deleted successfully"}
+
+# GET sections by department and semester
+@router.get("/by-department-semester/")
+def get_sections_by_department_semester(department: str, semester: str, db: Session = Depends(get_db)):
+    return crud.get_sections_by_department_semester(db, department, semester)

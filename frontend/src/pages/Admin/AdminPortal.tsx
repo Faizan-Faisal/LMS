@@ -22,6 +22,7 @@ import ManageSections from './ManageSections';
 import ManageSettings from './ManageSettings';
 import ManageCourses from './ManageCourses';
 import ManageDepartments from './ManageDepartments';
+import ManageReports from './ManageReports'
 import ManageAnnouncements from './ManageAnnouncements';
 import StudentEnrollmentManagement from './StudentEnrollmentManagement';
 import Icon from '../../components/Icon';
@@ -83,7 +84,7 @@ const navItems: NavItem[] = [
     },
     { 
         label: 'Reports', 
-        path: '#', 
+        path: '/admin/reports', 
         icon: FaChartBar
     },
     { 
@@ -235,6 +236,7 @@ const AdminPortal: React.FC = () => {
                     <Route path="departments" element={<ManageDepartments />} />
                     <Route path="courses" element={<ManageCourses />} />
                     <Route path="sections" element={<ManageSections />} />
+                    <Route path="reports" element={<ManageReports />} />
                     <Route path="settings" element={<ManageSettings />} />
                     <Route path="announcements" element={<ManageAnnouncements />} />
                 </Routes>

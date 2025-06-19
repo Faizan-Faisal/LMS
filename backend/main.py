@@ -18,6 +18,8 @@ from routers.instructor import (
 )
 from routers.student import student_auth_router, attendance, exam_record, course_material, student_enrollment_router
 from routers.admin import admin_auth_router
+from routers.admin import report as admin_report_router
+from routers.admin import admins as admin_router
 
 # Configure logging
 logging.basicConfig(
@@ -94,6 +96,7 @@ app.include_router(pre_course.router, prefix="/api/course_prerequisites", tags=[
 app.include_router(course_offerings.router, prefix="/api/course_offerings", tags=["Course Offerings"])
 app.include_router(announcements.router, prefix="/api/announcements", tags=["Announcements"])
 app.include_router(admin_auth_router.router, prefix="/api/admin", tags=["Admin Auth"])
+app.include_router(admin_router.router, prefix="/api", tags=["Admin Management"])
 app.include_router(instructor_course_router.router, prefix="/api/instructor", tags=["Instructor Courses"])
 app.include_router(student_enrollment_router.router, prefix="/api/student", tags=["Student Enrollments"])
 
@@ -106,6 +109,8 @@ app.include_router(course_materials.router, prefix="/api/instructor", tags=["Ins
 app.include_router(attendance.router, prefix="/api/student", tags=["Student Attendance"])
 app.include_router(exam_record.router, prefix="/api/student", tags=["Student Exams"])
 app.include_router(course_material.router, prefix="/api/student", tags=["Student Materials"])
+
+app.include_router(admin_report_router.router, prefix="/api/admin", tags=["Admin Reports"])
 
 if __name__ == "__main__":
     import uvicorn
