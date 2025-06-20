@@ -26,6 +26,7 @@ import ManageReports from './ManageReports'
 import ManageAnnouncements from './ManageAnnouncements';
 import StudentEnrollmentManagement from './StudentEnrollmentManagement';
 import Icon from '../../components/Icon';
+import ManageAdmins from './ManageAdmins';
 // Import API functions
 import { getInstructors } from '../../api/instructorapi';
 import { getStudents } from '../../api/studentapi';
@@ -91,6 +92,11 @@ const navItems: NavItem[] = [
         label: 'Settings', 
         path: '/admin/settings', 
         icon: FaCog
+    },
+    { 
+        label: 'Manage Admins', 
+        path: '/admin/admins', 
+        icon: FaUsers
     },
     { 
         label: 'Logout', 
@@ -180,6 +186,19 @@ const AdminPortal: React.FC = () => {
                 <nav className="flex-1">
                     <ul className="space-y-2">
                         {navItems.map((item) => {
+                            if (item.label === 'Logout') {
+                                return (
+                                    <li key={item.path}>
+                                        <button
+                                            onClick={handleLogout}
+                                            className={`flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-50 hover:text-gray-900 w-full text-left`}
+                                        >
+                                            <Icon icon={item.icon} className="h-5 w-5 mr-2" />
+                                            {item.label}
+                                        </button>
+                                    </li>
+                                );
+                            }
                             return (
                                 <li key={item.path}>
                                     <Link
@@ -239,6 +258,7 @@ const AdminPortal: React.FC = () => {
                     <Route path="reports" element={<ManageReports />} />
                     <Route path="settings" element={<ManageSettings />} />
                     <Route path="announcements" element={<ManageAnnouncements />} />
+                    <Route path="admins" element={<ManageAdmins />} />
                 </Routes>
             </main>
         </div>

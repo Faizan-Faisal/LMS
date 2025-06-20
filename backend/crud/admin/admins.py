@@ -12,7 +12,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 # ---------------------- ADMIN CRUD ----------------------
-def create_admin(db: Session, username: str, email: str, password: str, full_name: str):
+def create_admin(db: Session, username: str, password: str, email: str, full_name: str):
     hashed_password = hash_password(password)
     new_admin = AdminUser(
         username=username,

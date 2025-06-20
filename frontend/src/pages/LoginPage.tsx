@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { loginInstructor } from '../api/instructorAuthApi';
 import { loginStudent } from '../api/studentAuthApi';
+import { loginAdmin } from '../api/adminAuthApi';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
@@ -28,8 +29,9 @@ const LoginPage: React.FC = () => {
     try {
       switch (userType) {
         case 'admin':
+          const adminData = await loginAdmin(username, password);
           toast.success('Login successful!');
-          sessionStorage.removeItem('adminToken');
+          sessionStorage.setItem('adminToken', adminData.admin_id || '1');
           sessionStorage.removeItem('instructorToken');
           sessionStorage.removeItem('studentToken');
           navigate('/admin');

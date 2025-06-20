@@ -28,7 +28,7 @@ def create_superadmin():
         if existing:
             print("Superadmin already exists.")
             return
-        admin = admin_crud.create_admin(db, "superadmin", "super@123", "superadmin@example.com", "Super Admin")
+        admin = admin_crud.create_admin(db, "superadmin",  "superadmin@example.com", "super@123","Super Admin")
         print(f"✅ Superadmin created with ID: {admin.admin_id}")
     except IntegrityError:
         print("❌ Superadmin creation failed: User may already exist.")
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
 from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-hash_from_db = "$2b$12$GHP0k.jP3/n1xSqadfxpEOsP/Z5DvM3QOX25xLI/9Sa8vhDCx/geC"
+hash_from_db = "$2b$12$OQVQhc8KocA8oxMoxFHADuNJBHYjtcwAsBnDaAiu4ypQ1iS7GsQYy"
 print(pwd_context.verify("superadmin", hash_from_db))
 print(pwd_context.verify("super@123", hash_from_db))
 print(pwd_context.verify("superadmin@example.com", hash_from_db))
