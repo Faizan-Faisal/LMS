@@ -13,9 +13,8 @@ A comprehensive Learning Management System built with React, FastAPI, and MySQL.
 ## Project Structure
 ```
 LMS_PROJECT/
-├── frontend/           # React frontend application
-├── backend/           # FastAPI backend application
-└── database/          # Database schemas and migrations
+├── frontend/           # React frontend application           
+└── backend/            # FastAPI backend application
 ```
 
 ## Setup Instructions
