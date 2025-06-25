@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Enum, Text, Date, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Enum, Text, Date, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 import enum
@@ -13,6 +13,7 @@ class CourseMaterial(Base):
     description = Column(Text)
     file_path = Column(String(255), nullable=False)
     uploaded_at = Column(DateTime)
+    is_guidebook = Column(Boolean, default=False)
 
     offering = relationship("CourseOffering", back_populates="course_materials")
 
@@ -27,6 +28,7 @@ class CourseMaterial(Base):
             "title": self.title,
             "description": self.description,
             "file_path": self.file_path,
-            "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None
+            "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None,
+            "is_guidebook": self.is_guidebook
         }
 

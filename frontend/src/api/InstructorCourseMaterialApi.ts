@@ -8,6 +8,7 @@ export interface CourseMaterial {
     description?: string;
     file_path: string; // URL or path to the material
     uploaded_at: string; // ISO datetime string
+    is_guidebook?: boolean;
 }
 
 export interface CourseMaterialCreate {

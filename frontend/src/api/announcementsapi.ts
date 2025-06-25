@@ -3,14 +3,18 @@ import axios from 'axios';
 const BASE_URL = 'http://localhost:8000/api/announcements';
 
 // Helper to get authorization headers
-const getAuthHeaders = () => {
-    const instructorToken = localStorage.getItem('instructorToken');
-
+export const getAuthHeaders = () => {
+    const instructorToken = sessionStorage.getItem('instructorToken');
+    const adminToken = sessionStorage.getItem('adminToken');
     if (instructorToken) {
-        console.log('Instructor Token in getAuthHeaders (used):', instructorToken);
+        console.log('Using instructor token in getAuthHeaders:', instructorToken);
         return { Authorization: `Bearer ${instructorToken}` };
     }
-    console.log('No token found in getAuthHeaders.');
+    if (adminToken) {
+        console.log('Using admin token in getAuthHeaders:', adminToken);
+        return { Authorization: `Bearer ${adminToken}` };
+    }
+    console.warn('No token found in getAuthHeaders.');
     return {};
 };
 

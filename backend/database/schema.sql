@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS course_materials (
     description TEXT,
     file_path VARCHAR(255) NOT NULL,
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_guidebook BOOLEAN DEFAULT FALSE,
 
     CONSTRAINT fk_material_offering FOREIGN KEY (offering_id)
         REFERENCES course_offerings(offering_id)

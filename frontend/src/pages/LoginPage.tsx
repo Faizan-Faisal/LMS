@@ -5,6 +5,7 @@ import { loginStudent } from '../api/studentAuthApi';
 import { loginAdmin } from '../api/adminAuthApi';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -31,9 +32,18 @@ const LoginPage: React.FC = () => {
         case 'admin':
           const adminData = await loginAdmin(username, password);
           toast.success('Login successful!');
-          sessionStorage.setItem('adminToken', adminData.admin_id || '1');
+          sessionStorage.setItem('adminToken', adminData.access_token);
+          // Decode the token to get adminId
+          try {
+            const decoded: any = jwtDecode(adminData.access_token);
+            sessionStorage.setItem('adminId', decoded.id || decoded.sub || '');
+          } catch (e) {
+            sessionStorage.setItem('adminId', '');
+          }
           sessionStorage.removeItem('instructorToken');
           sessionStorage.removeItem('studentToken');
+          localStorage.removeItem('instructorToken');
+          localStorage.removeItem('studentToken');
           navigate('/admin');
           break;
         case 'instructor':
@@ -43,6 +53,8 @@ const LoginPage: React.FC = () => {
           sessionStorage.setItem('instructorToken', instructorData.access_token);
           sessionStorage.removeItem('adminToken');
           sessionStorage.removeItem('studentToken');
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('studentToken');
           navigate('/instructor');
           break;
         case 'student':
@@ -52,6 +64,8 @@ const LoginPage: React.FC = () => {
           sessionStorage.setItem('studentToken', studentData.access_token);
           sessionStorage.removeItem('adminToken');
           sessionStorage.removeItem('instructorToken');
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('instructorToken');
           navigate('/student');
           break;
         default:

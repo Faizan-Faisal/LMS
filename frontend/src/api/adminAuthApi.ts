@@ -7,6 +7,6 @@ export const loginAdmin = async (username: string, password: string) => {
   formData.append('username', username);
   formData.append('password', password);
 
-  const response = await axios.post(`${API_URL}/api/admin/login`, formData);
+  const response = await axios.post(`${API_URL}/api/admin/token`, formData);
   return response.data;
 }; 

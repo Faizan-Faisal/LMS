@@ -34,11 +34,11 @@ interface AnnouncementCreatePayload {
     message: string;
     recipient_type: string;
     recipient_ids?: string | null;
-    department_name?: string | null; // Changed from department_id to department_name
+    department_name?: string | null;
     priority?: 'Normal' | 'High';
     valid_until?: string | null;
-    sender_type: string;
-    sender_id?: string | null;
+    sender_type?: string; // Optional for backend
+    sender_id?: string | null; // Optional for backend
 }
 
 interface AnnouncementRead extends AnnouncementBase {
@@ -78,6 +78,7 @@ const ManageAnnouncements: React.FC = () => {
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementRead | null>(null); // State for selected announcement
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false); // State for delete confirmation modal
     const [announcementToDelete, setAnnouncementToDelete] = useState<number | null>(null); // State to store ID of announcement to delete
+    const adminId = sessionStorage.getItem('adminId');
 
     useEffect(() => {
         fetchAnnouncements();
@@ -137,9 +138,7 @@ const ManageAnnouncements: React.FC = () => {
             message: form.message,
             recipient_type: form.recipient_type,
             priority: form.priority,
-            valid_until: form.valid_until ? form.valid_until.toISOString().split('T')[0] : null, // YYYY-MM-DD
-            sender_type: 'Admin', // Explicitly set sender_type for Admin portal
-            sender_id: null, // Admin usually doesn't have a sender_id in this context
+            valid_until: form.valid_until ? form.valid_until.toISOString().split('T')[0] : null,
         };
 
         // Conditionally add recipient_ids or department_name

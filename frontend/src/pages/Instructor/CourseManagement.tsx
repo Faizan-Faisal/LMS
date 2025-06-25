@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getInstructorCourses, CourseOfferingResponse } from '../../api/instructorCourseApi';
 import { toast } from 'react-toastify';
 import { getCourseMaterialsByOffering, uploadCourseMaterial, updateCourseMaterial, deleteCourseMaterial, CourseMaterial } from '../../api/InstructorCourseMaterialApi';
+import { processMaterial, getSubjects } from '../../api/Rag';
 
 const CourseManagement: React.FC = () => {
     const [courses, setCourses] = useState<CourseOfferingResponse[]>([]);
@@ -22,6 +23,10 @@ const CourseManagement: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [materialToDelete, setMaterialToDelete] = useState<number | null>(null);
     const [showCustomizeModal, setShowCustomizeModal] = useState<boolean>(false);
+    const [ragSubjects, setRagSubjects] = useState<string[]>([]);
+    const [selectedSubject, setSelectedSubject] = useState<string>('');
+    const [subjectError, setSubjectError] = useState<string | null>(null);
+    const [isGuidebook, setIsGuidebook] = useState(false);
 
     const courseThemes = [
         '/images/course_themes/img 1.png',
@@ -82,6 +87,43 @@ const CourseManagement: React.FC = () => {
         }
     };
 
+    // Fetch RAG subjects on mount
+    useEffect(() => {
+        getSubjects()
+            .then(res => {
+                setRagSubjects(Array.isArray(res.data) ? res.data : res.data.subjects || []);
+            })
+            .catch(() => setRagSubjects([]));
+    }, []);
+
+    // Auto-select subject when course changes
+    useEffect(() => {
+        if (selectedOfferingForMaterials && ragSubjects.length > 0) {
+            const courseName = selectedOfferingForMaterials.course_rel?.course_name || '';
+            const matched = ragSubjects.find(s => s.toLowerCase() === courseName.toLowerCase());
+            setSelectedSubject(matched || '');
+            setSubjectError(matched ? null : 'No exact subject match found. Please select.');
+        } else {
+            setSelectedSubject('');
+            setSubjectError(null);
+        }
+    }, [selectedOfferingForMaterials, ragSubjects]);
+
+    // Update useEffect for subject auto-selection
+    useEffect(() => {
+        if (isGuidebook && selectedOfferingForMaterials && ragSubjects.length > 0) {
+            const courseName = selectedOfferingForMaterials.course_rel?.course_name || '';
+            const matched = ragSubjects.find(
+                s => s.toLowerCase() === courseName.toLowerCase()
+            );
+            setSelectedSubject(matched || '');
+            setSubjectError(matched ? null : 'No exact subject match found. Please select.');
+        } else {
+            setSelectedSubject('');
+            setSubjectError(null);
+        }
+    }, [isGuidebook, selectedOfferingForMaterials, ragSubjects]);
+
     const handleUploadMaterial = async () => {
         if (!selectedOfferingForMaterials) {
             toast.error("Please select a course to upload materials.");
@@ -91,6 +133,7 @@ const CourseManagement: React.FC = () => {
             toast.error("Please provide a title and select a file.");
             return;
         }
+        // No subject selection or error check needed
 
         const formData = new FormData();
         formData.append('offering_id', selectedOfferingForMaterials.offering_id.toString());
@@ -99,18 +142,28 @@ const CourseManagement: React.FC = () => {
             formData.append('description', materialDescription);
         }
         formData.append('file', materialFile);
+        formData.append('is_guidebook', String(isGuidebook));
 
         try {
             setLoading(true);
+            // 1. Upload to LMS
             await uploadCourseMaterial(formData);
-            toast.success("Course material uploaded successfully!");
+            // 2. Optionally upload to RAG
+            if (isGuidebook) {
+                const courseName = selectedOfferingForMaterials.course_rel?.course_name || '';
+                await processMaterial(materialFile, courseName);
+                toast.success("Course material uploaded and processed for RAG successfully!");
+            } else {
+                toast.success("Course material uploaded successfully!");
+            }
             setMaterialTitle('');
             setMaterialDescription('');
             setMaterialFile(null);
+            setIsGuidebook(false);
             fetchCourseMaterials(selectedOfferingForMaterials.offering_id); // Refresh list
         } catch (error) {
             console.error("Error uploading material:", error);
-            toast.error("Failed to upload course material.");
+            toast.error("Failed to upload or process course material.");
         } finally {
             setLoading(false);
         }
@@ -306,6 +359,16 @@ const CourseManagement: React.FC = () => {
                                 <p className="text-gray-600 text-sm mt-2">Current file: <span className="font-medium">{editingMaterial.file_path.split('/').pop()}</span></p>
                             )}
                         </div>
+                        <div className="mb-4 flex items-center">
+                            <input
+                                type="checkbox"
+                                id="isGuidebook"
+                                checked={isGuidebook}
+                                onChange={e => setIsGuidebook(e.target.checked)}
+                                className="mr-2"
+                            />
+                            <label htmlFor="isGuidebook" className="text-gray-700 font-semibold">Mark as Guidebook (RAG)</label>
+                        </div>
                         <div className="flex space-x-4">
                             <button
                                 onClick={editingMaterial ? handleUpdateMaterial : handleUploadMaterial}
@@ -343,6 +406,7 @@ const CourseManagement: React.FC = () => {
                                             <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</th>
                                             <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">File</th>
                                             <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Uploaded At</th>
+                                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Guidebook</th>
                                             <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
@@ -363,6 +427,13 @@ const CourseManagement: React.FC = () => {
                                                     </a>
                                                 </td>
                                                 <td className="px-5 py-4 border-b border-gray-200 bg-white text-sm text-gray-700">{new Date(material.uploaded_at).toLocaleString()}</td>
+                                                <td className="px-5 py-4 border-b border-gray-200 bg-white text-sm">
+                                                    {material.is_guidebook ? (
+                                                        <span className="text-green-600 font-bold">✔</span>
+                                                    ) : (
+                                                        <span className="text-gray-400">—</span>
+                                                    )}
+                                                </td>
                                                 <td className="px-5 py-4 border-b border-gray-200 bg-white text-sm flex gap-3 justify-center">
                                                     <button
                                                         onClick={() => handleEditClick(material)}

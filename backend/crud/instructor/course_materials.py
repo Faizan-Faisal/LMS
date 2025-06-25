@@ -49,7 +49,7 @@ def update_material(db: Session, material_id: int, material_data: dict) -> Optio
     return material.to_dict()
 
 def delete_material(db: Session, material_id: int) -> Optional[dict]:
-    material = db.query(CourseMaterial).filter(CourseMaterial.id == material_id).first()
+    material = db.query(CourseMaterial).filter(CourseMaterial.material_id == material_id).first()
     if not material:
         return None
     

@@ -82,20 +82,23 @@ const ManageAnnouncements: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('instructorToken');
+        const token = sessionStorage.getItem('instructorToken');
+        console.log('Instructor token from sessionStorage:', token);
         if (token) {
             try {
                 const decodedToken: { sub: string } = jwtDecode(token);
+                console.log('Decoded instructor token:', decodedToken);
                 setInstructorId(decodedToken.sub);
             } catch (error) {
-                console.error("Error decoding instructor token:", error);
-                toast.error("Failed to get instructor ID from token.");
-                setLoading(false); // Stop loading if token decode fails
+                console.error('Error decoding instructor token:', error);
+                toast.error('Failed to decode instructor token. Please log in again.');
+                setInstructorId(null);
             }
         } else {
-            setLoading(false); // Stop loading if no token found
+            toast.error('No instructor token found. Please log in again.');
+            setInstructorId(null);
         }
-    }, []); // Empty dependency array to run only once on mount
+    }, []);
 
     useEffect(() => {
         if (instructorId) {
@@ -172,17 +175,7 @@ const ManageAnnouncements: React.FC = () => {
         };
 
         // Create base payload matching AnnouncementCreate model
-        const payload: {
-            title: string;
-            message: string;
-            recipient_type: string;
-            priority: string;
-            valid_until: string | null;
-            recipient_ids: string | null;
-            department_name: string | null;
-            sender_type: string;
-            sender_id: string;
-        } = {
+        const payload: AnnouncementCreatePayload = {
             title: form.title,
             message: form.message,
             recipient_type: form.recipient_type,
@@ -190,8 +183,6 @@ const ManageAnnouncements: React.FC = () => {
             valid_until: formatDate(form.valid_until),
             recipient_ids: null,
             department_name: null,
-            sender_type: 'Instructor',
-            sender_id: instructorId
         };
 
         // Add recipient_ids only if needed

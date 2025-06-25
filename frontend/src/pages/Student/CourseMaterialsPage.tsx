@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCourseMaterials, downloadCourseMaterial, CourseMaterial } from '../../api/Student/course_material';
 import { getStudentEnrollments, EnrolledCourse } from '../../api/Student/enrollment';
+import { askQuestion } from '../../api/Rag';
 
 const handleDownload = async (materialId: number, fileName: string) => {
   try {
@@ -57,6 +58,14 @@ const MaterialDetailModal: React.FC<{
   );
 };
 
+function formatAnswer(answer: string) {
+  // Remove all Markdown heading hashtags and extra spaces after them
+  let cleaned = answer.replace(/^#+\s?/gm, '');
+  // Optionally, trim leading/trailing whitespace
+  cleaned = cleaned.trim();
+  return cleaned;
+}
+
 const CourseMaterialsPage: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
   const [courseMaterials, setCourseMaterials] = useState<CourseMaterial[]>([]);
@@ -66,6 +75,10 @@ const CourseMaterialsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'cardView' | 'materialView'>('cardView');
   const [selectedMaterial, setSelectedMaterial] = useState<CourseMaterial | null>(null);
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [subject, setSubject] = useState<string>('');
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -108,6 +121,19 @@ const CourseMaterialsPage: React.FC = () => {
     fetchCourseMaterialsData();
   }, [studentId, selectedCourseId]);
 
+  // Set subject directly based on selected course
+  useEffect(() => {
+    if (selectedCourseId && enrolledCourses.length > 0) {
+      const course = enrolledCourses.find(e => e.offering_id === selectedCourseId);
+      const courseName = course?.offering_rel?.course_rel?.course_name || '';
+      setSubject(`${courseName}_notes`);
+    } else {
+      setSubject('');
+    }
+    setAnswer(null);
+    setQuestion('');
+  }, [selectedCourseId, enrolledCourses]);
+
   const handleCardClick = (offeringId: number) => {
     setSelectedCourseId(offeringId);
     setViewMode('materialView');
@@ -117,6 +143,24 @@ const CourseMaterialsPage: React.FC = () => {
     setSelectedCourseId(null);
     setCourseMaterials([]);
     setViewMode('cardView');
+  };
+
+  const handleAskQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAnswer(null);
+    setAsking(true);
+    try {
+      if (!subject) {
+        setAsking(false);
+        return;
+      }
+      const res = await askQuestion(subject, question);
+      setAnswer(res.data.answer || JSON.stringify(res.data));
+    } catch (err) {
+      setAnswer('Failed to get answer.');
+    } finally {
+      setAsking(false);
+    }
   };
 
   if (loading) {
@@ -159,7 +203,48 @@ const CourseMaterialsPage: React.FC = () => {
           >
             Back to Courses
           </button>
-          <h2 className="text-xl font-bold mb-4">Materials for selected course</h2>
+          {/* Show selected course name at the top */}
+          {(() => {
+            const course = enrolledCourses.find(e => e.offering_id === selectedCourseId);
+            const courseName = course?.offering_rel?.course_rel?.course_name || '';
+            return (
+              <h2 className="text-xl font-bold mb-4">Materials for: <span className="text-blue-700">{courseName}</span></h2>
+            );
+          })()}
+          {/* RAG Ask a Question Section */}
+          <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-semibold mb-2">Ask a Question about this Subject</h3>
+            <form onSubmit={handleAskQuestion} className="flex flex-col gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 items-center">
+                <input
+                  type="text"
+                  className="flex-1 border rounded px-3 py-2"
+                  placeholder="Type your question..."
+                  value={question}
+                  onChange={e => setQuestion(e.target.value)}
+                  required
+                  disabled={asking || !subject}
+                />
+                {/* Always show subject */}
+                <span className="text-sm text-gray-600 ml-2">Subject: <b>{subject}</b></span>
+                <button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow ml-2"
+                  disabled={asking || !question || !subject}
+                >
+                  {asking ? 'Asking...' : 'Ask'}
+                </button>
+              </div>
+            </form>
+            {answer && (
+              <div className="mt-4 p-3 bg-white border rounded text-gray-800" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                <b>Answer:</b>
+                <pre style={{ whiteSpace: 'pre-line', margin: 0 }}>
+                  {formatAnswer(answer)}
+                </pre>
+              </div>
+            )}
+          </div>
           {courseMaterials.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>

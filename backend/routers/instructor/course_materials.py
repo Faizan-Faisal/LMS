@@ -40,6 +40,7 @@ async def add_material(
     title: str = Form(...),
     description: Optional[str] = Form(None),
     file: UploadFile = File(...),
+    is_guidebook: bool = Form(False),
     db: Session = Depends(get_db)
 ):
     # Save the uploaded file
@@ -53,6 +54,7 @@ async def add_material(
         "title": title,
         "description": description,
         "file_path": file_path,
+        "is_guidebook": is_guidebook,
     }
     return crud.create_material(db, material_data)
 
@@ -61,11 +63,13 @@ def update_material(
     material_id: int,
     title: Optional[str] = Body(None),
     description: Optional[str] = Body(None),
+    is_guidebook: Optional[bool] = Body(None),
     db: Session = Depends(get_db)
 ):
     material_data = {
         "title": title,
-        "description": description
+        "description": description,
+        "is_guidebook": is_guidebook
     }
     # Remove None values
     material_data = {k: v for k, v in material_data.items() if v is not None}
